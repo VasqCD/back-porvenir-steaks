@@ -38,6 +38,9 @@ class AuthController extends Controller
             'fecha_registro' => now(),
         ]);
 
+        // Asignar rol usando Spatie
+        $user->assignRole('cliente');
+
         // Aquí enviarías el código de verificación al correo
         // Mail::to($user->email)->send(new VerificationCode($user));
 
