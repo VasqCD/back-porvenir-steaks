@@ -2,22 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'apellido',
@@ -29,21 +23,11 @@ class User extends Authenticatable
         'foto_perfil',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -53,5 +37,47 @@ class User extends Authenticatable
             'ultima_conexion' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    // Relación con pedidos
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class, 'usuario_id');
+    }
+
+    // Relación con ubicaciones
+    public function ubicaciones()
+    {
+        return $this->hasMany(Ubicacion::class, 'usuario_id');
+    }
+
+    // Relación con notificaciones
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'usuario_id');
+    }
+
+    // Relación con el perfil de repartidor
+    public function repartidor()
+    {
+        return $this->hasOne(Repartidor::class, 'usuario_id');
+    }
+
+    // Verificar si es repartidor
+    public function esRepartidor()
+    {
+        return $this->rol === 'repartidor';
+    }
+
+    // Verificar si es administrador
+    public function esAdministrador()
+    {
+        return $this->rol === 'administrador';
+    }
+
+    // Verificar si es cliente
+    public function esCliente()
+    {
+        return $this->rol === 'cliente';
     }
 }
