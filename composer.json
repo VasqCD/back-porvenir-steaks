@@ -10,6 +10,7 @@
         "bezhansalleh/filament-shield": "^3.3",
         "cheesegrits/filament-google-maps": "^3.0",
         "filament/filament": "3.3",
+        "knuckleswtf/scribe": "*",
         "kreait/laravel-firebase": "^6.0",
         "laravel-notification-channels/fcm": "^5.1",
         "laravel/framework": "^12.0",
