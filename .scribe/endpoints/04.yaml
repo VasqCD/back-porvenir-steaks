@@ -1,0 +1,645 @@
+name: 'Gestión de Ubicaciones'
+description: |-
+
+  APIs para administrar direcciones de entrega de los usuarios
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/ubicaciones
+    metadata:
+      groupName: 'Gestión de Ubicaciones'
+      groupDescription: |-
+
+        APIs para administrar direcciones de entrega de los usuarios
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Guardar una nueva ubicación'
+      description: 'Registra una nueva dirección de entrega para el usuario autenticado.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      latitud:
+        name: latitud
+        description: 'Latitud de la ubicación.'
+        required: true
+        example: '14.09876'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      longitud:
+        name: longitud
+        description: 'Longitud de la ubicación.'
+        required: true
+        example: '-87.23456'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      direccion_completa:
+        name: direccion_completa
+        description: 'Dirección completa.'
+        required: true
+        example: 'Boulevard Morazán, Torre Morazán, Local 5'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      calle:
+        name: calle
+        description: 'nullable Nombre de la calle.'
+        required: false
+        example: 'Boulevard Morazán'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      numero:
+        name: numero
+        description: 'nullable Número de casa/edificio.'
+        required: false
+        example: '300'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      colonia:
+        name: colonia
+        description: 'nullable Colonia o barrio.'
+        required: false
+        example: Morazán
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      ciudad:
+        name: ciudad
+        description: 'nullable Ciudad.'
+        required: false
+        example: Tegucigalpa
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      codigo_postal:
+        name: codigo_postal
+        description: 'nullable Código postal.'
+        required: false
+        example: '11103'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      referencias:
+        name: referencias
+        description: 'nullable Referencias adicionales.'
+        required: false
+        example: 'Torre de oficinas, entrada principal'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      etiqueta:
+        name: etiqueta
+        description: 'nullable Etiqueta para identificar la ubicación.'
+        required: false
+        example: Oficina
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      es_principal:
+        name: es_principal
+        description: 'Indica si es la dirección principal.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      latitud: '14.09876'
+      longitud: '-87.23456'
+      direccion_completa: 'Boulevard Morazán, Torre Morazán, Local 5'
+      calle: 'Boulevard Morazán'
+      numero: '300'
+      colonia: Morazán
+      ciudad: Tegucigalpa
+      codigo_postal: '11103'
+      referencias: 'Torre de oficinas, entrada principal'
+      etiqueta: Oficina
+      es_principal: false
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+             "message": "Ubicación guardada exitosamente",
+             "ubicacion": {
+               "id": 3,
+               "usuario_id": 1,
+               "latitud": 14.09876,
+               "longitud": -87.23456,
+               "direccion_completa": "Boulevard Morazán, Torre Morazán, Local 5",
+               "calle": "Boulevard Morazán",
+               "numero": "300",
+               "colonia": "Morazán",
+               "ciudad": "Tegucigalpa",
+               "codigo_postal": "11103",
+               "referencias": "Torre de oficinas, entrada principal",
+               "etiqueta": "Oficina",
+               "es_principal": false,
+               "created_at": "2025-04-02T18:00:00.000000Z",
+               "updated_at": "2025-04-02T18:00:00.000000Z"
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/ubicaciones/{id}'
+    metadata:
+      groupName: 'Gestión de Ubicaciones'
+      groupDescription: |-
+
+        APIs para administrar direcciones de entrega de los usuarios
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Actualizar una ubicación'
+      description: 'Actualiza la información de una ubicación existente.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID de la ubicación.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      latitud:
+        name: latitud
+        description: 'sometimes Latitud de la ubicación.'
+        required: false
+        example: '14.12355'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      longitud:
+        name: longitud
+        description: 'sometimes Longitud de la ubicación.'
+        required: false
+        example: '-87.12365'
+        type: numeric
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      direccion_completa:
+        name: direccion_completa
+        description: 'sometimes Dirección completa.'
+        required: false
+        example: 'Calle Principal #124, Colonia Centro'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      calle:
+        name: calle
+        description: 'nullable Nombre de la calle.'
+        required: false
+        example: 'Calle Principal'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      numero:
+        name: numero
+        description: 'nullable Número de casa/edificio.'
+        required: false
+        example: '124'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      colonia:
+        name: colonia
+        description: 'nullable Colonia o barrio.'
+        required: false
+        example: Centro
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      ciudad:
+        name: ciudad
+        description: 'nullable Ciudad.'
+        required: false
+        example: Tegucigalpa
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      codigo_postal:
+        name: codigo_postal
+        description: 'nullable Código postal.'
+        required: false
+        example: '11101'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      referencias:
+        name: referencias
+        description: 'nullable Referencias adicionales.'
+        required: false
+        example: 'Edificio azul, apartamento 2B'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      etiqueta:
+        name: etiqueta
+        description: 'nullable Etiqueta para identificar la ubicación.'
+        required: false
+        example: Casa
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+      es_principal:
+        name: es_principal
+        description: 'Indica si es la dirección principal.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      latitud: '14.12355'
+      longitud: '-87.12365'
+      direccion_completa: 'Calle Principal #124, Colonia Centro'
+      calle: 'Calle Principal'
+      numero: '124'
+      colonia: Centro
+      ciudad: Tegucigalpa
+      codigo_postal: '11101'
+      referencias: 'Edificio azul, apartamento 2B'
+      etiqueta: Casa
+      es_principal: true
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Ubicación actualizada exitosamente",
+             "ubicacion": {
+               "id": 1,
+               "usuario_id": 1,
+               "latitud": 14.12355,
+               "longitud": -87.12365,
+               "direccion_completa": "Calle Principal #124, Colonia Centro",
+               "calle": "Calle Principal",
+               "numero": "124",
+               "colonia": "Centro",
+               "ciudad": "Tegucigalpa",
+               "codigo_postal": "11101",
+               "referencias": "Edificio azul, apartamento 2B",
+               "etiqueta": "Casa",
+               "es_principal": true,
+               "created_at": "2025-04-01T10:00:00.000000Z",
+               "updated_at": "2025-04-02T18:15:00.000000Z"
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para actualizar esta ubicación"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\Ubicacion] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - DELETE
+    uri: 'api/ubicaciones/{id}'
+    metadata:
+      groupName: 'Gestión de Ubicaciones'
+      groupDescription: |-
+
+        APIs para administrar direcciones de entrega de los usuarios
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Eliminar una ubicación'
+      description: 'Elimina una ubicación registrada por el usuario.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID de la ubicación.'
+        required: true
+        example: 3
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 3
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Ubicación eliminada exitosamente"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para eliminar esta ubicación"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\Ubicacion] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/ubicaciones
+    metadata:
+      groupName: 'Gestión de Ubicaciones'
+      groupDescription: |-
+
+        APIs para administrar direcciones de entrega de los usuarios
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar ubicaciones del usuario'
+      description: |-
+        Obtiene todas las ubicaciones registradas por el usuario autenticado.
+        Los administradores pueden ver todas las ubicaciones de todos los usuarios.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "data": [
+               {
+                 "id": 1,
+                 "usuario_id": 1,
+                 "latitud": 14.12345,
+                 "longitud": -87.12345,
+                 "direccion_completa": "Calle Principal #123, Colonia Centro",
+                 "calle": "Calle Principal",
+                 "numero": "123",
+                 "colonia": "Centro",
+                 "ciudad": "Tegucigalpa",
+                 "codigo_postal": "11101",
+                 "referencias": "Edificio azul, segunda planta",
+                 "etiqueta": "Casa",
+                 "es_principal": true,
+                 "created_at": "2025-04-01T10:00:00.000000Z",
+                 "updated_at": "2025-04-01T10:00:00.000000Z"
+               },
+               {
+                 "id": 2,
+                 "usuario_id": 1,
+                 "latitud": 14.54321,
+                 "longitud": -87.54321,
+                 "direccion_completa": "Avenida La Paz, Edificio Corporativo",
+                 "calle": "Avenida La Paz",
+                 "numero": "45",
+                 "colonia": "Distrito Financiero",
+                 "ciudad": "Tegucigalpa",
+                 "codigo_postal": "11102",
+                 "referencias": "Edificio de cristal, piso 8",
+                 "etiqueta": "Trabajo",
+                 "es_principal": false,
+                 "created_at": "2025-04-01T10:15:00.000000Z",
+                 "updated_at": "2025-04-01T10:15:00.000000Z"
+               }
+             ]
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/ubicaciones/{id}'
+    metadata:
+      groupName: 'Gestión de Ubicaciones'
+      groupDescription: |-
+
+        APIs para administrar direcciones de entrega de los usuarios
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mostrar una ubicación específica'
+      description: 'Obtiene los detalles de una ubicación específica.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID de la ubicación.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "id": 1,
+             "usuario_id": 1,
+             "latitud": 14.12345,
+             "longitud": -87.12345,
+             "direccion_completa": "Calle Principal #123, Colonia Centro",
+             "calle": "Calle Principal",
+             "numero": "123",
+             "colonia": "Centro",
+             "ciudad": "Tegucigalpa",
+             "codigo_postal": "11101",
+             "referencias": "Edificio azul, segunda planta",
+             "etiqueta": "Casa",
+             "es_principal": true,
+             "created_at": "2025-04-01T10:00:00.000000Z",
+             "updated_at": "2025-04-01T10:00:00.000000Z"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para ver esta ubicación"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\Ubicacion] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []

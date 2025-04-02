@@ -1,0 +1,719 @@
+name: 'Gestión de Pedidos'
+description: |-
+
+  APIs para la gestión del ciclo de vida de los pedidos
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/pedidos
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Crear un nuevo pedido'
+      description: 'Crea un nuevo pedido con los productos seleccionados.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      ubicacion_id:
+        name: ubicacion_id
+        description: 'ID de la ubicación de entrega.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      productos:
+        name: productos
+        description: 'Lista de productos a ordenar.'
+        required: true
+        example:
+          - architecto
+        type: 'string[]'
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'productos[].producto_id':
+        name: 'productos[].producto_id'
+        description: 'The <code>id</code> of an existing record in the productos table.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'productos[].cantidad':
+        name: 'productos[].cantidad'
+        description: 'Must be at least 1.'
+        required: true
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      'productos.*.producto_id':
+        name: 'productos.*.producto_id'
+        description: 'ID del producto.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      'productos.*.cantidad':
+        name: 'productos.*.cantidad'
+        description: 'Cantidad del producto (mínimo 1).'
+        required: true
+        example: 2
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      ubicacion_id: 1
+      productos:
+        - architecto
+    fileParameters: []
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+             "message": "Pedido creado exitosamente",
+             "pedido": {
+               "id": 2,
+               "usuario_id": 1,
+               "ubicacion_id": 1,
+               "estado": "pendiente",
+               "total": 700.00,
+               "fecha_pedido": "2025-04-02T17:00:00.000000Z",
+               "fecha_entrega": null,
+               "repartidor_id": null,
+               "created_at": "2025-04-02T17:00:00.000000Z",
+               "updated_at": "2025-04-02T17:00:00.000000Z",
+               "detalles": [
+                 {
+                   "id": 2,
+                   "pedido_id": 2,
+                   "producto_id": 1,
+                   "cantidad": 2,
+                   "precio_unitario": 350.00,
+                   "subtotal": 700.00,
+                   "producto": {
+                     "id": 1,
+                     "nombre": "T-Bone Steak",
+                     "precio": 350.00
+                   }
+                 }
+               ],
+               "ubicacion": {
+                 "id": 1,
+                 "direccion_completa": "Calle Principal #123, Colonia Centro"
+               }
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+             "message": "El producto T-Bone Steak no está disponible"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/pedidos
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar pedidos del usuario'
+      description: 'Obtiene todos los pedidos realizados por el usuario autenticado.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      estado:
+        name: estado
+        description: 'Filtrar por estado (pendiente, en_cocina, en_camino, entregado, cancelado).'
+        required: false
+        example: pendiente
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      estado: pendiente
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "data": [
+               {
+                 "id": 1,
+                 "usuario_id": 1,
+                 "ubicacion_id": 1,
+                 "estado": "pendiente",
+                 "total": 350.00,
+                 "fecha_pedido": "2025-04-02T10:00:00.000000Z",
+                 "fecha_entrega": null,
+                 "repartidor_id": null,
+                 "calificacion": null,
+                 "comentario_calificacion": null,
+                 "created_at": "2025-04-02T10:00:00.000000Z",
+                 "updated_at": "2025-04-02T10:00:00.000000Z",
+                 "detalles": [
+                   {
+                     "id": 1,
+                     "pedido_id": 1,
+                     "producto_id": 1,
+                     "cantidad": 1,
+                     "precio_unitario": 350.00,
+                     "subtotal": 350.00,
+                     "producto": {
+                       "id": 1,
+                       "nombre": "T-Bone Steak",
+                       "imagen": "productos/tbone.jpg",
+                       "precio": 350.00
+                     }
+                   }
+                 ],
+                 "ubicacion": {
+                   "id": 1,
+                   "direccion_completa": "Calle Principal #123, Colonia Centro",
+                   "latitud": 14.12345,
+                   "longitud": -87.12345
+                 },
+                 "repartidor": null
+               }
+             ]
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/pedidos/{id}'
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mostrar un pedido específico'
+      description: 'Obtiene los detalles completos de un pedido específico.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID del pedido.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "id": 1,
+             "usuario_id": 1,
+             "ubicacion_id": 1,
+             "estado": "pendiente",
+             "total": 350.00,
+             "fecha_pedido": "2025-04-02T10:00:00.000000Z",
+             "fecha_entrega": null,
+             "repartidor_id": null,
+             "calificacion": null,
+             "comentario_calificacion": null,
+             "created_at": "2025-04-02T10:00:00.000000Z",
+             "updated_at": "2025-04-02T10:00:00.000000Z",
+             "detalles": [
+               {
+                 "id": 1,
+                 "pedido_id": 1,
+                 "producto_id": 1,
+                 "cantidad": 1,
+                 "precio_unitario": 350.00,
+                 "subtotal": 350.00,
+                 "producto": {
+                   "id": 1,
+                   "nombre": "T-Bone Steak",
+                   "descripcion": "Corte premium de 16oz",
+                   "imagen": "productos/tbone.jpg",
+                   "precio": 350.00
+                 }
+               }
+             ],
+             "ubicacion": {
+               "id": 1,
+               "direccion_completa": "Calle Principal #123, Colonia Centro",
+               "latitud": 14.12345,
+               "longitud": -87.12345
+             },
+             "repartidor": null,
+             "historialEstados": []
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para ver este pedido"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\Pedido] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: 'api/pedidos/{id}/estado'
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Actualizar estado de un pedido'
+      description: 'Actualiza el estado de un pedido y envía notificaciones.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID del pedido.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      estado:
+        name: estado
+        description: 'Nuevo estado del pedido (pendiente, en_cocina, en_camino, entregado, cancelado).'
+        required: true
+        example: en_cocina
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      estado: en_cocina
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Estado de pedido actualizado exitosamente",
+             "pedido": {
+               "id": 1,
+               "estado": "en_cocina",
+               "updated_at": "2025-04-02T17:15:00.000000Z"
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para actualizar este pedido"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\Pedido] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: 'api/pedidos/{id}/calificar'
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Calificar un pedido'
+      description: 'Permite al cliente calificar un pedido entregado.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID del pedido.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      calificacion:
+        name: calificacion
+        description: 'Calificación del pedido (1-5).'
+        required: true
+        example: 5
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      comentario_calificacion:
+        name: comentario_calificacion
+        description: 'nullable Comentario sobre la calificación.'
+        required: false
+        example: 'Excelente servicio y comida de calidad'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      calificacion: 5
+      comentario_calificacion: 'Excelente servicio y comida de calidad'
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Pedido calificado exitosamente",
+             "pedido": {
+               "id": 1,
+               "calificacion": 5,
+               "comentario_calificacion": "Excelente servicio y comida de calidad",
+               "updated_at": "2025-04-02T20:30:00.000000Z"
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para calificar este pedido"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+             "message": "Solo puede calificar pedidos entregados"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/pedidos-pendientes
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar pedidos pendientes'
+      description: |-
+        Obtiene los pedidos pendientes para administradores y repartidores.
+        Los administradores ven pedidos 'pendiente' y 'en_cocina'.
+        Los repartidores solo ven sus pedidos asignados con estado 'en_camino'.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "data": [
+               {
+                 "id": 1,
+                 "usuario_id": 1,
+                 "ubicacion_id": 1,
+                 "estado": "en_cocina",
+                 "total": 350.00,
+                 "fecha_pedido": "2025-04-02T10:00:00.000000Z",
+                 "fecha_entrega": null,
+                 "repartidor_id": null,
+                 "created_at": "2025-04-02T10:00:00.000000Z",
+                 "updated_at": "2025-04-02T17:15:00.000000Z",
+                 "detalles": [...],
+                 "ubicacion": {...},
+                 "usuario": {
+                   "id": 1,
+                   "name": "Juan Pérez",
+                   "telefono": "+504 9999-9999"
+                 }
+               }
+             ]
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para esta acción"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: 'api/pedidos/{id}/asignar-repartidor'
+    metadata:
+      groupName: 'Gestión de Pedidos'
+      groupDescription: |-
+
+        APIs para la gestión del ciclo de vida de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Asignar repartidor a un pedido'
+      description: |-
+        Asigna un repartidor a un pedido en estado 'pendiente' o 'en_cocina'.
+        Solo disponible para administradores.
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID del pedido.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      repartidor_id:
+        name: repartidor_id
+        description: 'ID del repartidor.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      repartidor_id: 1
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Repartidor asignado exitosamente",
+             "pedido": {
+               "id": 1,
+               "repartidor_id": 1,
+               "updated_at": "2025-04-02T17:30:00.000000Z"
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para esta acción"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+             "message": "Solo se puede asignar repartidor a pedidos pendientes o en cocina"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []

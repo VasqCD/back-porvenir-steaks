@@ -1,0 +1,201 @@
+name: 'Detalles de Pedidos'
+description: |-
+
+  APIs para consultar los detalles de los pedidos
+endpoints:
+  -
+    httpMethods:
+      - GET
+    uri: api/detalles-pedido
+    metadata:
+      groupName: 'Detalles de Pedidos'
+      groupDescription: |-
+
+        APIs para consultar los detalles de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Listar detalles de un pedido'
+      description: 'Obtiene todos los detalles de un pedido específico.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      pedido_id:
+        name: pedido_id
+        description: 'ID del pedido.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanQueryParameters:
+      pedido_id: 1
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "data": [
+               {
+                 "id": 1,
+                 "pedido_id": 1,
+                 "producto_id": 1,
+                 "cantidad": 1,
+                 "precio_unitario": 350.00,
+                 "subtotal": 350.00,
+                 "created_at": "2025-04-02T10:00:00.000000Z",
+                 "updated_at": "2025-04-02T10:00:00.000000Z",
+                 "producto": {
+                   "id": 1,
+                   "nombre": "T-Bone Steak",
+                   "descripcion": "Corte premium de 16oz",
+                   "precio": 350.00,
+                   "imagen": "productos/tbone.jpg"
+                 }
+               }
+             ]
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+             "message": "Debe proporcionar un ID de pedido"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para ver este pedido"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\Pedido] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/detalles-pedido/{id}'
+    metadata:
+      groupName: 'Detalles de Pedidos'
+      groupDescription: |-
+
+        APIs para consultar los detalles de los pedidos
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Mostrar un detalle específico'
+      description: 'Obtiene la información de un detalle específico de un pedido.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        name: id
+        description: 'ID del detalle.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      id: 1
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "id": 1,
+             "pedido_id": 1,
+             "producto_id": 1,
+             "cantidad": 1,
+             "precio_unitario": 350.00,
+             "subtotal": 350.00,
+             "created_at": "2025-04-02T10:00:00.000000Z",
+             "updated_at": "2025-04-02T10:00:00.000000Z",
+             "producto": {
+               "id": 1,
+               "nombre": "T-Bone Steak",
+               "descripcion": "Corte premium de 16oz",
+               "precio": 350.00,
+               "imagen": "productos/tbone.jpg"
+             },
+             "pedido": {
+               "id": 1,
+               "usuario_id": 1,
+               "estado": "en_cocina",
+               "total": 350.00,
+               "fecha_pedido": "2025-04-02T10:00:00.000000Z"
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 403
+        content: |-
+          {
+             "message": "No tiene permiso para ver este detalle"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+             "message": "No query results for model [App\\Models\\DetallePedido] 99"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []

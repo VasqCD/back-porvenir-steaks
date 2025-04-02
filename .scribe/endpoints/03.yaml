@@ -1,0 +1,130 @@
+name: 'Notificaciones FCM'
+description: |-
+
+  APIs para administrar los tokens FCM (Firebase Cloud Messaging) y enviar notificaciones push
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/fcm/register
+    metadata:
+      groupName: 'Notificaciones FCM'
+      groupDescription: |-
+
+        APIs para administrar los tokens FCM (Firebase Cloud Messaging) y enviar notificaciones push
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Registrar token FCM'
+      description: 'Registra un token FCM para el usuario autenticado, permitiendo el envío de notificaciones push.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      token:
+        name: token
+        description: 'Token FCM del dispositivo.'
+        required: true
+        example: 'fMEYI7D6T-KOMyUyP0Rj1B:APA91bGj6kRc5...'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      device_type:
+        name: device_type
+        description: 'nullable Tipo de dispositivo (android, ios, web).'
+        required: false
+        example: android
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        custom: []
+    cleanBodyParameters:
+      token: 'fMEYI7D6T-KOMyUyP0Rj1B:APA91bGj6kRc5...'
+      device_type: android
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Token FCM registrado exitosamente"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/fcm/test
+    metadata:
+      groupName: 'Notificaciones FCM'
+      groupDescription: |-
+
+        APIs para administrar los tokens FCM (Firebase Cloud Messaging) y enviar notificaciones push
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Enviar notificación de prueba'
+      description: 'Envía una notificación push de prueba al dispositivo del usuario autenticado.'
+      authenticated: true
+      custom: []
+    headers:
+      Authorization: 'Bearer {SCRIBE_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+             "message": "Notificación enviada exitosamente",
+             "result": {
+               "success": 1,
+               "failures": 0
+             }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+             "message": "No se pudo enviar la notificación. Asegúrate de haber registrado tu token FCM."
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+    custom: []
