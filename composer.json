@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bezhansalleh/filament-shield": "^3.3",
         "cheesegrits/filament-google-maps": "^3.0",
         "filament/filament": "3.3",
         "laravel-notification-channels/fcm": "^5.1",
@@ -14,6 +15,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.7",
         "laravel/tinker": "^2.10.1",
+        "pusher/pusher-php-server": "^7.2",
+        "pxlrbt/filament-excel": "^2.4",
         "spatie/laravel-medialibrary": "^11.12",
         "spatie/laravel-permission": "^6.16"
     },
