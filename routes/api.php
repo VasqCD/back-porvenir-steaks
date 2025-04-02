@@ -33,6 +33,10 @@ Route::get('/productos/{id}', [ProductoController::class, 'show']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
+    // Rutas para FCM
+    Route::post('/fcm/register', [FcmController::class, 'registerToken']);
+    Route::post('/fcm/test', [FcmController::class, 'testNotification']);
+
     // Perfil de usuario
     Route::get('/user', [AuthController::class, 'perfil']);
     Route::post('/user/update', [AuthController::class, 'actualizarPerfil']);
@@ -73,4 +77,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/repartidor/actualizar-ubicacion', [RepartidorController::class, 'actualizarUbicacion']);
         Route::post('/repartidor/cambiar-disponibilidad', [RepartidorController::class, 'cambiarDisponibilidad']);
     });
+
 });

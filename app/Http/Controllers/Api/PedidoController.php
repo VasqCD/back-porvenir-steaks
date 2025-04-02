@@ -10,9 +10,17 @@ use App\Models\Notificacion;
 use App\Models\HistorialEstadoPedido;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\FcmService;
 
 class PedidoController extends Controller
 {
+    protected $fcmService;
+
+    public function __construct(FcmService $fcmService)
+    {
+        $this->fcmService = $fcmService;
+    }
+
     /**
      * Mostrar listado de pedidos del usuario autenticado.
      */
@@ -225,6 +233,12 @@ class PedidoController extends Controller
                 'mensaje' => $mensaje,
                 'tipo' => $tipoNotificacion,
             ]);
+
+            $this->fcmService->sendPedidoStatusNotification(
+                $pedido->usuario,
+                (string) $pedido->id,
+                $request->estado
+            );
 
             DB::commit();
 

@@ -81,4 +81,9 @@ class User extends Authenticatable
     {
         return $this->rol === 'cliente';
     }
+
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class, 'usuario_id');
+    }
 }
