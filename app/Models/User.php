@@ -9,6 +9,38 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * Modelo de Usuario
+ *
+ * Representa a los usuarios del sistema incluyendo clientes, repartidores y administradores.
+ *
+ * @property int $id ID único del usuario
+ * @property string $name Nombre del usuario
+ * @property string|null $apellido Apellido del usuario
+ * @property string $email Email único del usuario (utilizado para autenticación)
+ * @property \Illuminate\Support\Carbon|null $email_verified_at Fecha de verificación de email
+ * @property string $password Contraseña encriptada
+ * @property string|null $telefono Número telefónico del usuario
+ * @property string $rol Rol del usuario (cliente, repartidor, administrador)
+ * @property string|null $codigo_verificacion Código temporal para verificaciones y recuperación de cuenta
+ * @property string|null $foto_perfil Ruta a la imagen de perfil
+ * @property \Illuminate\Support\Carbon $fecha_registro Fecha de registro del usuario
+ * @property \Illuminate\Support\Carbon|null $ultima_conexion Última fecha de conexión
+ * @property string|null $remember_token Token para recordar sesión
+ * @property \Illuminate\Support\Carbon|null $created_at Fecha de creación del registro
+ * @property \Illuminate\Support\Carbon|null $updated_at Fecha de última actualización
+ * @property \Illuminate\Support\Carbon|null $deleted_at Fecha de eliminación (soft delete)
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Pedido[] $pedidos Pedidos realizados por el usuario
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Ubicacion[] $ubicaciones Ubicaciones registradas por el usuario
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Notificacion[] $notificaciones Notificaciones del usuario
+ * @property-read \App\Models\Repartidor|null $repartidor Perfil de repartidor asociado (si el rol es 'repartidor')
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\FcmToken[] $fcmTokens Tokens FCM para notificaciones push
+ *
+ * @method bool esRepartidor() Verifica si el usuario tiene rol de repartidor
+ * @method bool esAdministrador() Verifica si el usuario tiene rol de administrador
+ * @method bool esCliente() Verifica si el usuario tiene rol de cliente
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
