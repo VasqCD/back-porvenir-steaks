@@ -4,15 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     // Registro de usuario
     public function register(Request $request)
     {
@@ -24,9 +30,6 @@ class AuthController extends Controller
             'telefono' => 'nullable|string|max:20',
         ]);
 
-        // Generar código de verificación
-        $codigoVerificacion = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
         $user = User::create([
             'name' => $request->name,
             'apellido' => $request->apellido,
@@ -34,15 +37,14 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'telefono' => $request->telefono,
             'rol' => 'cliente', // Por defecto es un cliente
-            'codigo_verificacion' => $codigoVerificacion,
             'fecha_registro' => now(),
         ]);
 
         // Asignar rol usando Spatie
         $user->assignRole('cliente');
 
-        // Aquí enviarías el código de verificación al correo
-        // Mail::to($user->email)->send(new VerificationCode($user));
+        // Generar y enviar código de verificación
+        $this->authService->enviarCodigoVerificacion($user);
 
         // Crear token
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -91,20 +93,21 @@ class AuthController extends Controller
             'codigo' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)
-            ->where('codigo_verificacion', $request->codigo)
-            ->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user) {
+            return response()->json([
+                'message' => 'No se encontró usuario con ese correo',
+            ], 404);
+        }
+
+        $verificado = $this->authService->verificarCodigo($user, $request->codigo);
+
+        if (!$verificado) {
             return response()->json([
                 'message' => 'Código de verificación inválido',
             ], 422);
         }
-
-        // Verificar usuario
-        $user->email_verified_at = now();
-        $user->codigo_verificacion = null; // Limpiar código
-        $user->save();
 
         return response()->json([
             'message' => 'Correo verificado exitosamente',
@@ -127,13 +130,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Generar nuevo código
-        $codigoVerificacion = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        $user->codigo_verificacion = $codigoVerificacion;
-        $user->save();
-
-        // Enviar código por correo
-        // Mail::to($user->email)->send(new VerificationCode($user));
+        $this->authService->enviarCodigoVerificacion($user);
 
         return response()->json([
             'message' => 'Código reenviado exitosamente',
@@ -155,13 +152,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Generar código temporal para recuperación
-        $codigoTemporal = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        $user->codigo_verificacion = $codigoTemporal;
-        $user->save();
-
-        // Enviar código por correo
-        // Mail::to($user->email)->send(new RecuperacionPassword($user));
+        $this->authService->enviarCodigoRecuperacion($user);
 
         return response()->json([
             'message' => 'Se ha enviado un código de recuperación a tu correo',

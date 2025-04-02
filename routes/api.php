@@ -67,4 +67,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('productos', ProductoController::class)->except(['index', 'show']);
         Route::apiResource('repartidores', RepartidorController::class);
     });
+
+    // Rutas para repartidores
+    Route::middleware(['auth:sanctum', 'role:repartidor'])->group(function () {
+        Route::post('/repartidor/actualizar-ubicacion', [RepartidorController::class, 'actualizarUbicacion']);
+        Route::post('/repartidor/cambiar-disponibilidad', [RepartidorController::class, 'cambiarDisponibilidad']);
+    });
 });
