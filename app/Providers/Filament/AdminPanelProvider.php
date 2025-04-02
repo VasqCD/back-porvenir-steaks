@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo.png'))
             ->brandName('El Porvenir Steaks')
             ->sidebarCollapsibleOnDesktop()
-            ->darkMode()
+            ->darkMode(true)
             ->favicon(asset('images/favicon.ico'))
             ->renderHook(
                 'panels::sidebar.brand',
