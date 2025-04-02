@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\FcmService;
 
+/**
+ * @group Gestión de Pedidos
+ *
+ * APIs para la gestión del ciclo de vida de los pedidos
+ */
 class PedidoController extends Controller
 {
     protected $fcmService;
@@ -22,7 +27,55 @@ class PedidoController extends Controller
     }
 
     /**
-     * Mostrar listado de pedidos del usuario autenticado.
+     * Listar pedidos del usuario
+     *
+     * Obtiene todos los pedidos realizados por el usuario autenticado.
+     *
+     * @queryParam estado string Filtrar por estado (pendiente, en_cocina, en_camino, entregado, cancelado). Example: pendiente
+     *
+     * @response {
+     *    "data": [
+     *      {
+     *        "id": 1,
+     *        "usuario_id": 1,
+     *        "ubicacion_id": 1,
+     *        "estado": "pendiente",
+     *        "total": 350.00,
+     *        "fecha_pedido": "2025-04-02T10:00:00.000000Z",
+     *        "fecha_entrega": null,
+     *        "repartidor_id": null,
+     *        "calificacion": null,
+     *        "comentario_calificacion": null,
+     *        "created_at": "2025-04-02T10:00:00.000000Z",
+     *        "updated_at": "2025-04-02T10:00:00.000000Z",
+     *        "detalles": [
+     *          {
+     *            "id": 1,
+     *            "pedido_id": 1,
+     *            "producto_id": 1,
+     *            "cantidad": 1,
+     *            "precio_unitario": 350.00,
+     *            "subtotal": 350.00,
+     *            "producto": {
+     *              "id": 1,
+     *              "nombre": "T-Bone Steak",
+     *              "imagen": "productos/tbone.jpg",
+     *              "precio": 350.00
+     *            }
+     *          }
+     *        ],
+     *        "ubicacion": {
+     *          "id": 1,
+     *          "direccion_completa": "Calle Principal #123, Colonia Centro",
+     *          "latitud": 14.12345,
+     *          "longitud": -87.12345
+     *        },
+     *        "repartidor": null
+     *      }
+     *    ]
+     * }
+     *
+     * @authenticated
      */
     public function index(Request $request)
     {
@@ -45,7 +98,55 @@ class PedidoController extends Controller
     }
 
     /**
-     * Crear un nuevo pedido.
+     * Crear un nuevo pedido
+     *
+     * Crea un nuevo pedido con los productos seleccionados.
+     *
+     * @bodyParam ubicacion_id integer required ID de la ubicación de entrega. Example: 1
+     * @bodyParam productos array required Lista de productos a ordenar.
+     * @bodyParam productos.*.producto_id integer required ID del producto. Example: 1
+     * @bodyParam productos.*.cantidad integer required Cantidad del producto (mínimo 1). Example: 2
+     *
+     * @response 201 {
+     *    "message": "Pedido creado exitosamente",
+     *    "pedido": {
+     *      "id": 2,
+     *      "usuario_id": 1,
+     *      "ubicacion_id": 1,
+     *      "estado": "pendiente",
+     *      "total": 700.00,
+     *      "fecha_pedido": "2025-04-02T17:00:00.000000Z",
+     *      "fecha_entrega": null,
+     *      "repartidor_id": null,
+     *      "created_at": "2025-04-02T17:00:00.000000Z",
+     *      "updated_at": "2025-04-02T17:00:00.000000Z",
+     *      "detalles": [
+     *        {
+     *          "id": 2,
+     *          "pedido_id": 2,
+     *          "producto_id": 1,
+     *          "cantidad": 2,
+     *          "precio_unitario": 350.00,
+     *          "subtotal": 700.00,
+     *          "producto": {
+     *            "id": 1,
+     *            "nombre": "T-Bone Steak",
+     *            "precio": 350.00
+     *          }
+     *        }
+     *      ],
+     *      "ubicacion": {
+     *        "id": 1,
+     *        "direccion_completa": "Calle Principal #123, Colonia Centro"
+     *      }
+     *    }
+     * }
+     *
+     * @response 422 {
+     *    "message": "El producto T-Bone Steak no está disponible"
+     * }
+     *
+     * @authenticated
      */
     public function store(Request $request)
     {
@@ -136,7 +237,61 @@ class PedidoController extends Controller
     }
 
     /**
-     * Mostrar un pedido específico.
+     * Mostrar un pedido específico
+     *
+     * Obtiene los detalles completos de un pedido específico.
+     *
+     * @urlParam id integer required ID del pedido. Example: 1
+     *
+     * @response {
+     *    "id": 1,
+     *    "usuario_id": 1,
+     *    "ubicacion_id": 1,
+     *    "estado": "pendiente",
+     *    "total": 350.00,
+     *    "fecha_pedido": "2025-04-02T10:00:00.000000Z",
+     *    "fecha_entrega": null,
+     *    "repartidor_id": null,
+     *    "calificacion": null,
+     *    "comentario_calificacion": null,
+     *    "created_at": "2025-04-02T10:00:00.000000Z",
+     *    "updated_at": "2025-04-02T10:00:00.000000Z",
+     *    "detalles": [
+     *      {
+     *        "id": 1,
+     *        "pedido_id": 1,
+     *        "producto_id": 1,
+     *        "cantidad": 1,
+     *        "precio_unitario": 350.00,
+     *        "subtotal": 350.00,
+     *        "producto": {
+     *          "id": 1,
+     *          "nombre": "T-Bone Steak",
+     *          "descripcion": "Corte premium de 16oz",
+     *          "imagen": "productos/tbone.jpg",
+     *          "precio": 350.00
+     *        }
+     *      }
+     *    ],
+     *    "ubicacion": {
+     *      "id": 1,
+     *      "direccion_completa": "Calle Principal #123, Colonia Centro",
+     *      "latitud": 14.12345,
+     *      "longitud": -87.12345
+     *    },
+     *    "repartidor": null,
+     *    "historialEstados": []
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para ver este pedido"
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Pedido] 99"
+     * }
+     *
+     * @authenticated
      */
     public function show($id)
     {
@@ -158,7 +313,31 @@ class PedidoController extends Controller
     }
 
     /**
-     * Actualizar el estado de un pedido.
+     * Actualizar estado de un pedido
+     *
+     * Actualiza el estado de un pedido y envía notificaciones.
+     *
+     * @urlParam id integer required ID del pedido. Example: 1
+     * @bodyParam estado string required Nuevo estado del pedido (pendiente, en_cocina, en_camino, entregado, cancelado). Example: en_cocina
+     *
+     * @response {
+     *    "message": "Estado de pedido actualizado exitosamente",
+     *    "pedido": {
+     *      "id": 1,
+     *      "estado": "en_cocina",
+     *      "updated_at": "2025-04-02T17:15:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para actualizar este pedido"
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Pedido] 99"
+     * }
+     *
+     * @authenticated
      */
     public function actualizarEstado(Request $request, $id)
     {
@@ -257,7 +436,33 @@ class PedidoController extends Controller
     }
 
     /**
-     * Calificar un pedido.
+     * Calificar un pedido
+     *
+     * Permite al cliente calificar un pedido entregado.
+     *
+     * @urlParam id integer required ID del pedido. Example: 1
+     * @bodyParam calificacion integer required Calificación del pedido (1-5). Example: 5
+     * @bodyParam comentario_calificacion string nullable Comentario sobre la calificación. Example: Excelente servicio y comida de calidad
+     *
+     * @response {
+     *    "message": "Pedido calificado exitosamente",
+     *    "pedido": {
+     *      "id": 1,
+     *      "calificacion": 5,
+     *      "comentario_calificacion": "Excelente servicio y comida de calidad",
+     *      "updated_at": "2025-04-02T20:30:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para calificar este pedido"
+     * }
+     *
+     * @response 422 {
+     *    "message": "Solo puede calificar pedidos entregados"
+     * }
+     *
+     * @authenticated
      */
     public function calificar(Request $request, $id)
     {
@@ -292,7 +497,41 @@ class PedidoController extends Controller
     }
 
     /**
-     * Obtener pedidos pendientes (para administrador o repartidor)
+     * Listar pedidos pendientes
+     *
+     * Obtiene los pedidos pendientes para administradores y repartidores.
+     * Los administradores ven pedidos 'pendiente' y 'en_cocina'.
+     * Los repartidores solo ven sus pedidos asignados con estado 'en_camino'.
+     *
+     * @response {
+     *    "data": [
+     *      {
+     *        "id": 1,
+     *        "usuario_id": 1,
+     *        "ubicacion_id": 1,
+     *        "estado": "en_cocina",
+     *        "total": 350.00,
+     *        "fecha_pedido": "2025-04-02T10:00:00.000000Z",
+     *        "fecha_entrega": null,
+     *        "repartidor_id": null,
+     *        "created_at": "2025-04-02T10:00:00.000000Z",
+     *        "updated_at": "2025-04-02T17:15:00.000000Z",
+     *        "detalles": [...],
+     *        "ubicacion": {...},
+     *        "usuario": {
+     *          "id": 1,
+     *          "name": "Juan Pérez",
+     *          "telefono": "+504 9999-9999"
+     *        }
+     *      }
+     *    ]
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para esta acción"
+     * }
+     *
+     * @authenticated
      */
     public function pendientes(Request $request)
     {
@@ -323,7 +562,32 @@ class PedidoController extends Controller
     }
 
     /**
-     * Asignar repartidor a un pedido (solo administrador)
+     * Asignar repartidor a un pedido
+     *
+     * Asigna un repartidor a un pedido en estado 'pendiente' o 'en_cocina'.
+     * Solo disponible para administradores.
+     *
+     * @urlParam id integer required ID del pedido. Example: 1
+     * @bodyParam repartidor_id integer required ID del repartidor. Example: 1
+     *
+     * @response {
+     *    "message": "Repartidor asignado exitosamente",
+     *    "pedido": {
+     *      "id": 1,
+     *      "repartidor_id": 1,
+     *      "updated_at": "2025-04-02T17:30:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para esta acción"
+     * }
+     *
+     * @response 422 {
+     *    "message": "Solo se puede asignar repartidor a pedidos pendientes o en cocina"
+     * }
+     *
+     * @authenticated
      */
     public function asignarRepartidor(Request $request, $id)
     {
