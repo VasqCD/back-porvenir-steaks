@@ -9,10 +9,60 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * @group Gestión de Repartidores
+ *
+ * APIs para administrar los repartidores del sistema
+ */
 class RepartidorController extends Controller
 {
     /**
-     * Mostrar todos los repartidores.
+     * Listar todos los repartidores
+     *
+     * Obtiene un listado de todos los repartidores registrados.
+     *
+     * @response {
+     *    "data": [
+     *      {
+     *        "id": 1,
+     *        "usuario_id": 2,
+     *        "disponible": true,
+     *        "ultima_ubicacion_lat": 14.55555,
+     *        "ultima_ubicacion_lng": -87.55555,
+     *        "ultima_actualizacion": "2025-04-02T18:30:00.000000Z",
+     *        "created_at": "2025-04-01T11:00:00.000000Z",
+     *        "updated_at": "2025-04-02T18:30:00.000000Z",
+     *        "usuario": {
+     *          "id": 2,
+     *          "name": "Carlos Martínez",
+     *          "apellido": "López",
+     *          "email": "carlos@ejemplo.com",
+     *          "telefono": "+504 8888-8888",
+     *          "rol": "repartidor"
+     *        }
+     *      },
+     *      {
+     *        "id": 2,
+     *        "usuario_id": 3,
+     *        "disponible": true,
+     *        "ultima_ubicacion_lat": 14.66666,
+     *        "ultima_ubicacion_lng": -87.66666,
+     *        "ultima_actualizacion": "2025-04-02T18:35:00.000000Z",
+     *        "created_at": "2025-04-01T11:15:00.000000Z",
+     *        "updated_at": "2025-04-02T18:35:00.000000Z",
+     *        "usuario": {
+     *          "id": 3,
+     *          "name": "Ana García",
+     *          "apellido": "Mendoza",
+     *          "email": "ana@ejemplo.com",
+     *          "telefono": "+504 7777-7777",
+     *          "rol": "repartidor"
+     *        }
+     *      }
+     *    ]
+     * }
+     *
+     * @authenticated
      */
     public function index()
     {
@@ -21,7 +71,44 @@ class RepartidorController extends Controller
     }
 
     /**
-     * Crear un nuevo repartidor.
+     * Crear un nuevo repartidor
+     *
+     * Registra un nuevo repartidor en el sistema. Crea tanto el usuario como el perfil de repartidor.
+     *
+     * @bodyParam name string required Nombre del repartidor. Example: Luis
+     * @bodyParam apellido string nullable Apellido del repartidor. Example: Hernández
+     * @bodyParam email string required Email del repartidor (debe ser único). Example: luis@ejemplo.com
+     * @bodyParam password string required Contraseña del repartidor (mínimo 8 caracteres). Example: Password123
+     * @bodyParam telefono string required Número telefónico del repartidor. Example: +504 9876-5432
+     *
+     * @response 201 {
+     *    "message": "Repartidor creado exitosamente",
+     *    "repartidor": {
+     *      "id": 3,
+     *      "usuario_id": 4,
+     *      "disponible": true,
+     *      "created_at": "2025-04-02T19:00:00.000000Z",
+     *      "updated_at": "2025-04-02T19:00:00.000000Z",
+     *      "usuario": {
+     *        "id": 4,
+     *        "name": "Luis",
+     *        "apellido": "Hernández",
+     *        "email": "luis@ejemplo.com",
+     *        "telefono": "+504 9876-5432",
+     *        "rol": "repartidor",
+     *        "fecha_registro": "2025-04-02T19:00:00.000000Z"
+     *      }
+     *    }
+     * }
+     *
+     * @response 422 {
+     *    "message": "The given data was invalid.",
+     *    "errors": {
+     *        "email": ["El email ya ha sido registrado."]
+     *    }
+     * }
+     *
+     * @authenticated
      */
     public function store(Request $request)
     {
@@ -73,7 +160,36 @@ class RepartidorController extends Controller
     }
 
     /**
-     * Mostrar un repartidor específico.
+     * Mostrar un repartidor específico
+     *
+     * Obtiene los detalles de un repartidor específico.
+     *
+     * @urlParam id integer required ID del repartidor. Example: 1
+     *
+     * @response {
+     *    "id": 1,
+     *    "usuario_id": 2,
+     *    "disponible": true,
+     *    "ultima_ubicacion_lat": 14.55555,
+     *    "ultima_ubicacion_lng": -87.55555,
+     *    "ultima_actualizacion": "2025-04-02T18:30:00.000000Z",
+     *    "created_at": "2025-04-01T11:00:00.000000Z",
+     *    "updated_at": "2025-04-02T18:30:00.000000Z",
+     *    "usuario": {
+     *      "id": 2,
+     *      "name": "Carlos Martínez",
+     *      "apellido": "López",
+     *      "email": "carlos@ejemplo.com",
+     *      "telefono": "+504 8888-8888",
+     *      "rol": "repartidor"
+     *    }
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Repartidor] 99"
+     * }
+     *
+     * @authenticated
      */
     public function show($id)
     {
@@ -82,7 +198,34 @@ class RepartidorController extends Controller
     }
 
     /**
-     * Actualizar un repartidor.
+     * Actualizar un repartidor
+     *
+     * Actualiza la información de un repartidor existente.
+     *
+     * @urlParam id integer required ID del repartidor. Example: 1
+     * @bodyParam disponible boolean Estado de disponibilidad del repartidor. Example: false
+     * @bodyParam ultima_ubicacion_lat numeric Latitud de la última ubicación registrada. Example: 14.55565
+     * @bodyParam ultima_ubicacion_lng numeric Longitud de la última ubicación registrada. Example: -87.55565
+     *
+     * @response {
+     *    "message": "Repartidor actualizado exitosamente",
+     *    "repartidor": {
+     *      "id": 1,
+     *      "usuario_id": 2,
+     *      "disponible": false,
+     *      "ultima_ubicacion_lat": 14.55565,
+     *      "ultima_ubicacion_lng": -87.55565,
+     *      "ultima_actualizacion": "2025-04-02T19:15:00.000000Z",
+     *      "created_at": "2025-04-01T11:00:00.000000Z",
+     *      "updated_at": "2025-04-02T19:15:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Repartidor] 99"
+     * }
+     *
+     * @authenticated
      */
     public function update(Request $request, $id)
     {
@@ -114,7 +257,21 @@ class RepartidorController extends Controller
     }
 
     /**
-     * Eliminar un repartidor.
+     * Eliminar un repartidor
+     *
+     * Elimina un repartidor y cambia su rol a cliente.
+     *
+     * @urlParam id integer required ID del repartidor. Example: 3
+     *
+     * @response {
+     *    "message": "Repartidor eliminado exitosamente"
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Repartidor] 99"
+     * }
+     *
+     * @authenticated
      */
     public function destroy($id)
     {
@@ -150,7 +307,29 @@ class RepartidorController extends Controller
     }
 
     /**
-     * Actualizar la ubicación del repartidor.
+     * Actualizar ubicación del repartidor
+     *
+     * Actualiza la ubicación actual del repartidor autenticado.
+     *
+     * @bodyParam latitud numeric required Latitud de la ubicación actual. Example: 14.57575
+     * @bodyParam longitud numeric required Longitud de la ubicación actual. Example: -87.57575
+     *
+     * @response {
+     *    "message": "Ubicación actualizada exitosamente",
+     *    "repartidor": {
+     *      "id": 1,
+     *      "ultima_ubicacion_lat": 14.57575,
+     *      "ultima_ubicacion_lng": -87.57575,
+     *      "ultima_actualizacion": "2025-04-02T19:30:00.000000Z",
+     *      "updated_at": "2025-04-02T19:30:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para esta acción"
+     * }
+     *
+     * @authenticated
      */
     public function actualizarUbicacion(Request $request)
     {
@@ -180,7 +359,26 @@ class RepartidorController extends Controller
     }
 
     /**
-     * Cambiar disponibilidad del repartidor.
+     * Cambiar disponibilidad del repartidor
+     *
+     * Actualiza el estado de disponibilidad del repartidor autenticado.
+     *
+     * @bodyParam disponible boolean required Estado de disponibilidad (true=disponible, false=no disponible). Example: false
+     *
+     * @response {
+     *    "message": "Disponibilidad actualizada exitosamente",
+     *    "repartidor": {
+     *      "id": 1,
+     *      "disponible": false,
+     *      "updated_at": "2025-04-02T19:45:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 403 {
+     *    "message": "No tiene permiso para esta acción"
+     * }
+     *
+     * @authenticated
      */
     public function cambiarDisponibilidad(Request $request)
     {
