@@ -6,6 +6,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Modelo de Repartidor
+ *
+ * Representa el perfil de repartidor asociado a un usuario con rol 'repartidor'.
+ *
+ * @property int $id ID único del repartidor
+ * @property int $usuario_id ID del usuario asociado
+ * @property bool $disponible Indica si el repartidor está disponible para entregas
+ * @property float|null $ultima_ubicacion_lat Latitud de la última ubicación registrada
+ * @property float|null $ultima_ubicacion_lng Longitud de la última ubicación registrada
+ * @property \Illuminate\Support\Carbon|null $ultima_actualizacion Fecha y hora de la última actualización de ubicación
+ * @property \Illuminate\Support\Carbon|null $created_at Fecha de creación del registro
+ * @property \Illuminate\Support\Carbon|null $updated_at Fecha de última actualización
+ * @property \Illuminate\Support\Carbon|null $deleted_at Fecha de eliminación (soft delete)
+ *
+ * @property-read \App\Models\User $usuario Usuario asociado a este perfil de repartidor
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Pedido[] $pedidos Pedidos asignados a este repartidor
+ */
 class Repartidor extends Model
 {
     use HasFactory, SoftDeletes;
