@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\FcmService;
 use Illuminate\Http\Request;
 
+/**
+ * @group Notificaciones FCM
+ *
+ * APIs para administrar los tokens FCM (Firebase Cloud Messaging) y enviar notificaciones push
+ */
 class FcmController extends Controller
 {
     protected $fcmService;
@@ -16,7 +21,18 @@ class FcmController extends Controller
     }
 
     /**
-     * Registrar token FCM para el usuario autenticado
+     * Registrar token FCM
+     *
+     * Registra un token FCM para el usuario autenticado, permitiendo el envío de notificaciones push.
+     *
+     * @bodyParam token string required Token FCM del dispositivo. Example: fMEYI7D6T-KOMyUyP0Rj1B:APA91bGj6kRc5...
+     * @bodyParam device_type string nullable Tipo de dispositivo (android, ios, web). Example: android
+     *
+     * @response {
+     *    "message": "Token FCM registrado exitosamente"
+     * }
+     *
+     * @authenticated
      */
     public function registerToken(Request $request)
     {
@@ -37,6 +53,22 @@ class FcmController extends Controller
 
     /**
      * Enviar notificación de prueba
+     *
+     * Envía una notificación push de prueba al dispositivo del usuario autenticado.
+     *
+     * @response {
+     *    "message": "Notificación enviada exitosamente",
+     *    "result": {
+     *      "success": 1,
+     *      "failures": 0
+     *    }
+     * }
+     *
+     * @response 400 {
+     *    "message": "No se pudo enviar la notificación. Asegúrate de haber registrado tu token FCM."
+     * }
+     *
+     * @authenticated
      */
     public function testNotification(Request $request)
     {
