@@ -30,8 +30,20 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->colors([
                 'primary' => Color::Amber,
+                'secondary' => Color::Blue,
+                'danger' => Color::Rose,
+                'gray' => Color::Slate,
+                'warning' => Color::Orange,
+                'success' => Color::Emerald,
             ])
+            ->brandLogo(asset('images/logo.png'))
             ->brandName('El Porvenir Steaks')
+            ->sidebarCollapsibleOnDesktop()
+            ->darkMode()
+            ->renderHook(
+                'panels::sidebar.brand',
+                fn () => view('filament.custom.brand')
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
