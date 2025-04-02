@@ -7,10 +7,55 @@ use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @group Gestión de Productos
+ *
+ * APIs para administrar el catálogo de productos
+ */
 class ProductoController extends Controller
 {
     /**
-     * Mostrar listado de productos.
+     * Listar productos
+     *
+     * Obtiene un listado de productos disponibles. Se pueden aplicar filtros por categoría y nombre.
+     *
+     * @queryParam categoria_id integer Filtrar productos por ID de categoría. Example: 1
+     * @queryParam nombre string Filtrar productos por nombre (búsqueda parcial). Example: steak
+     *
+     * @response {
+     *    "data": [
+     *      {
+     *        "id": 1,
+     *        "nombre": "T-Bone Steak",
+     *        "descripcion": "Corte premium de 16oz",
+     *        "precio": 350.00,
+     *        "imagen": "productos/tbone.jpg",
+     *        "categoria_id": 1,
+     *        "disponible": true,
+     *        "created_at": "2025-04-01T10:30:00.000000Z",
+     *        "updated_at": "2025-04-01T10:30:00.000000Z",
+     *        "categoria": {
+     *          "id": 1,
+     *          "nombre": "Carnes"
+     *        }
+     *      },
+     *      {
+     *        "id": 2,
+     *        "nombre": "Ribeye Steak",
+     *        "descripcion": "Corte jugoso de 12oz",
+     *        "precio": 280.00,
+     *        "imagen": "productos/ribeye.jpg",
+     *        "categoria_id": 1,
+     *        "disponible": true,
+     *        "created_at": "2025-04-01T10:35:00.000000Z",
+     *        "updated_at": "2025-04-01T10:35:00.000000Z",
+     *        "categoria": {
+     *          "id": 1,
+     *          "nombre": "Carnes"
+     *        }
+     *      }
+     *    ]
+     * }
      */
     public function index(Request $request)
     {
@@ -32,7 +77,40 @@ class ProductoController extends Controller
     }
 
     /**
-     * Crear un nuevo producto.
+     * Crear un nuevo producto
+     *
+     * Crea un nuevo producto en el catálogo.
+     *
+     * @bodyParam nombre string required Nombre del producto. Example: New York Steak
+     * @bodyParam descripcion string nullable Descripción del producto. Example: Corte fino de 10oz
+     * @bodyParam precio numeric required Precio del producto (mayor a 0). Example: 260.00
+     * @bodyParam categoria_id integer required ID de la categoría a la que pertenece. Example: 1
+     * @bodyParam imagen file nullable Imagen del producto (jpeg, png, jpg - máx: 2MB).
+     * @bodyParam disponible boolean nullable Indica si el producto está disponible para la venta. Example: true
+     *
+     * @response 201 {
+     *    "message": "Producto creado exitosamente",
+     *    "producto": {
+     *      "id": 3,
+     *      "nombre": "New York Steak",
+     *      "descripcion": "Corte fino de 10oz",
+     *      "precio": 260.00,
+     *      "imagen": "productos/newyork.jpg",
+     *      "categoria_id": 1,
+     *      "disponible": true,
+     *      "created_at": "2025-04-02T16:00:00.000000Z",
+     *      "updated_at": "2025-04-02T16:00:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 422 {
+     *    "message": "The given data was invalid.",
+     *    "errors": {
+     *        "precio": ["El precio debe ser mayor a 0."]
+     *    }
+     * }
+     *
+     * @authenticated
      */
     public function store(Request $request)
     {
@@ -61,7 +139,32 @@ class ProductoController extends Controller
     }
 
     /**
-     * Mostrar un producto específico.
+     * Mostrar un producto específico
+     *
+     * Obtiene los detalles de un producto específico.
+     *
+     * @urlParam id integer required ID del producto. Example: 1
+     *
+     * @response {
+     *    "id": 1,
+     *    "nombre": "T-Bone Steak",
+     *    "descripcion": "Corte premium de 16oz",
+     *    "precio": 350.00,
+     *    "imagen": "productos/tbone.jpg",
+     *    "categoria_id": 1,
+     *    "disponible": true,
+     *    "created_at": "2025-04-01T10:30:00.000000Z",
+     *    "updated_at": "2025-04-01T10:30:00.000000Z",
+     *    "categoria": {
+     *      "id": 1,
+     *      "nombre": "Carnes",
+     *      "descripcion": "Cortes de carne premium"
+     *    }
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Producto] 99"
+     * }
      */
     public function show($id)
     {
@@ -71,7 +174,38 @@ class ProductoController extends Controller
     }
 
     /**
-     * Actualizar un producto existente.
+     * Actualizar un producto
+     *
+     * Actualiza la información de un producto existente.
+     *
+     * @urlParam id integer required ID del producto. Example: 1
+     * @bodyParam nombre string sometimes Nombre del producto. Example: T-Bone Steak Premium
+     * @bodyParam descripcion string nullable Descripción del producto. Example: Corte premium de 16oz, importado USDA Choice
+     * @bodyParam precio numeric sometimes Precio del producto (mayor a 0). Example: 375.00
+     * @bodyParam categoria_id integer sometimes ID de la categoría a la que pertenece. Example: 1
+     * @bodyParam imagen file nullable Nueva imagen del producto (jpeg, png, jpg - máx: 2MB).
+     * @bodyParam disponible boolean nullable Indica si el producto está disponible para la venta. Example: true
+     *
+     * @response {
+     *    "message": "Producto actualizado exitosamente",
+     *    "producto": {
+     *      "id": 1,
+     *      "nombre": "T-Bone Steak Premium",
+     *      "descripcion": "Corte premium de 16oz, importado USDA Choice",
+     *      "precio": 375.00,
+     *      "imagen": "productos/tbone_premium.jpg",
+     *      "categoria_id": 1,
+     *      "disponible": true,
+     *      "created_at": "2025-04-01T10:30:00.000000Z",
+     *      "updated_at": "2025-04-02T16:30:00.000000Z"
+     *    }
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Producto] 99"
+     * }
+     *
+     * @authenticated
      */
     public function update(Request $request, $id)
     {
@@ -106,7 +240,21 @@ class ProductoController extends Controller
     }
 
     /**
-     * Eliminar un producto.
+     * Eliminar un producto
+     *
+     * Elimina un producto del catálogo (soft delete).
+     *
+     * @urlParam id integer required ID del producto. Example: 3
+     *
+     * @response {
+     *    "message": "Producto eliminado exitosamente"
+     * }
+     *
+     * @response 404 {
+     *    "message": "No query results for model [App\\Models\\Producto] 99"
+     * }
+     *
+     * @authenticated
      */
     public function destroy($id)
     {
