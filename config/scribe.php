@@ -73,6 +73,11 @@ return [
         'middleware' => [],
 
         'grouping_by_resource' => true,
+
+        'pagination' => [
+            'enabled' => true,
+            'base_path' => 'docs', // Ruta base para los enlaces
+        ],
     ],
 
     'external' => [
