@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PedidoResource\Pages;
+use App\Filament\Resources\PedidoResource\RelationManagers;
 use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\HistorialEstadoPedido;
@@ -12,15 +13,23 @@ use Filament\Forms\Components\Card;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -29,7 +38,15 @@ class PedidoResource extends Resource
 {
     protected static ?string $model = Pedido::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    
+    protected static ?string $navigationLabel = 'Pedidos';
+    
+    protected static ?string $navigationGroup = 'Operaciones';
+    
+    protected static ?int $navigationSort = 1;
+    
+    protected static ?string $recordTitleAttribute = 'id';
 
     public static function form(Form $form): Form
     {
@@ -37,58 +54,103 @@ class PedidoResource extends Resource
             ->schema([
                 Card::make()
                     ->schema([
-                        Select::make('usuario_id')
-                            ->relationship('usuario', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                        Group::make()
+                            ->schema([
+                                Section::make('Información del Pedido')
+                                    ->schema([
+                                        Grid::make(2)
+                                            ->schema([
+                                                Select::make('usuario_id')
+                                                    ->relationship('usuario', 'name')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->required()
+                                                    ->columnSpan(1),
 
-                        Select::make('ubicacion_id')
-                            ->relationship('ubicacion', 'direccion_completa')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                                                Select::make('ubicacion_id')
+                                                    ->relationship('ubicacion', 'direccion_completa')
+                                                    ->searchable()
+                                                    ->preload()
+                                                    ->required()
+                                                    ->columnSpan(1),
+                                            ]),
 
-                        Select::make('estado')
-                            ->options([
-                                'pendiente' => 'Pendiente',
-                                'en_cocina' => 'En cocina',
-                                'en_camino' => 'En camino',
-                                'entregado' => 'Entregado',
-                                'cancelado' => 'Cancelado',
+                                        Select::make('estado')
+                                            ->options([
+                                                'pendiente' => 'Pendiente',
+                                                'en_cocina' => 'En cocina',
+                                                'en_camino' => 'En camino',
+                                                'entregado' => 'Entregado',
+                                                'cancelado' => 'Cancelado',
+                                            ])
+                                            ->default('pendiente')
+                                            ->required()
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if ($state === 'entregado') {
+                                                    $set('fecha_entrega', now());
+                                                }
+                                            })
+                                            ->columnSpan(1),
+                                            
+                                        Grid::make(2)
+                                            ->schema([
+                                                DateTimePicker::make('fecha_pedido')
+                                                    ->required()
+                                                    ->default(now())
+                                                    ->displayFormat('d/m/Y H:i'),
+
+                                                DateTimePicker::make('fecha_entrega')
+                                                    ->displayFormat('d/m/Y H:i')
+                                                    ->hidden(fn($get) => $get('estado') !== 'entregado'),
+                                            ]),
+
+                                        Select::make('repartidor_id')
+                                            ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario'))
+                                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->usuario->name)
+                                            ->searchable()
+                                            ->preload()
+                                            ->label('Repartidor')
+                                            ->hidden(fn($get) => in_array($get('estado'), ['pendiente', 'cancelado'])),
+                                    ])
+                                    ->columnSpan(['lg' => 2]),
+
+                                Section::make('Resumen')
+                                    ->schema([
+                                        TextInput::make('total')
+                                            ->disabled()
+                                            ->dehydrated(true)
+                                            ->required()
+                                            ->numeric()
+                                            ->prefix('L')
+                                            ->helperText('15% de impuesto incluido'),
+                                            
+                                        Placeholder::make('subtotal')
+                                            ->label('Subtotal')
+                                            ->content(function ($get, $record) {
+                                                if ($record) {
+                                                    $subtotal = $record->detalles->sum('subtotal');
+                                                    return 'L ' . number_format($subtotal, 2);
+                                                }
+                                                return 'L 0.00';
+                                            }),
+                                            
+                                        Placeholder::make('impuesto')
+                                            ->label('Impuesto (15%)')
+                                            ->content(function ($get, $record) {
+                                                if ($record) {
+                                                    $subtotal = $record->detalles->sum('subtotal');
+                                                    $impuesto = $subtotal * 0.15;
+                                                    return 'L ' . number_format($impuesto, 2);
+                                                }
+                                                return 'L 0.00';
+                                            }),
+                                    ])
+                                    ->columnSpan(['lg' => 1]),
                             ])
-                            ->default('pendiente')
-                            ->required()
-                            ->reactive()
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                if ($state === 'entregado') {
-                                    $set('fecha_entrega', now());
-                                }
-                            }),
-
-                        TextInput::make('total')
-                            ->disabled()
-                            ->dehydrated(true)
-                            ->required()
-                            ->numeric()
-                            ->prefix('L')
-                            ->helperText('15% de impuesto incluido'),
-
-                        DateTimePicker::make('fecha_pedido')
-                            ->required()
-                            ->default(now()),
-
-                        DateTimePicker::make('fecha_entrega')
-                            ->hidden(fn($get) => $get('estado') !== 'entregado'),
-
-                        Select::make('repartidor_id')
-                            ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario'))
-                            ->searchable()
-                            ->preload()
-                            ->label('Repartidor')
-                            ->hidden(fn($get) => in_array($get('estado'), ['pendiente', 'cancelado'])),
+                            ->columns(3),
                     ])
-                    ->columns(2),
+                    ->columnSpan('full'),
 
                 Card::make()
                     ->schema([
@@ -118,6 +180,7 @@ class PedidoResource extends Resource
                                     ->numeric()
                                     ->default(1)
                                     ->required()
+                                    ->minValue(1)
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, $set, $get, $livewire) {
                                         $precioUnitario = $get('precio_unitario');
@@ -147,6 +210,11 @@ class PedidoResource extends Resource
                             ->afterStateUpdated(function (array $state, callable $set, $livewire) {
                                 self::calcularTotal($livewire);
                             })
+                            ->itemLabel(fn (array $state): ?string => 
+                                $state['producto_id'] ? Producto::find($state['producto_id'])?->nombre ?? 'Producto' : 'Nuevo producto')
+                            ->collapsible()
+                            ->reorderable()
+                            ->cloneable()
                     ])
                     ->visible(fn($livewire) => $livewire instanceof Pages\CreatePedido || $livewire instanceof Pages\EditPedido),
 
@@ -162,9 +230,28 @@ class PedidoResource extends Resource
                             }),
 
                         Textarea::make('comentario_calificacion')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disabled(),
                     ])
                     ->visible(fn($record) => $record && $record->estado === 'entregado'),
+                    
+                Card::make()
+                    ->schema([
+                        Placeholder::make('historial_title')
+                            ->label('Historial de Estados')
+                            ->content(fn ($record) => $record ? '' : 'El historial estará disponible después de guardar'),
+                            
+                        Placeholder::make('historial')
+                            ->content(function ($record) {
+                                if (!$record) return null;
+                                
+                                return view('filament.components.historial-estados', [
+                                    'historial' => $record->historialEstados()->with('usuario')->orderBy('fecha_cambio', 'desc')->get()
+                                ]);
+                            })
+                            ->columnSpanFull(),
+                    ])
+                    ->visible(fn($record) => $record !== null),
             ]);
     }
 
@@ -172,13 +259,17 @@ class PedidoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('usuario.name')
+                TextColumn::make('id')
+                    ->label('# Pedido')
+                    ->sortable()
                     ->searchable(),
 
-                Tables\Columns\BadgeColumn::make('estado')
+                TextColumn::make('usuario.name')
+                    ->label('Cliente')
+                    ->searchable()
+                    ->sortable(),
+
+                BadgeColumn::make('estado')
                     ->colors([
                         'danger' => 'cancelado',
                         'warning' => 'pendiente',
@@ -195,21 +286,33 @@ class PedidoResource extends Resource
                     ])
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('total')
+                TextColumn::make('total')
                     ->money('HNL')
+                    ->label('Total')
+                    ->sortable(),
+                    
+                TextColumn::make('repartidor.usuario.name')
+                    ->label('Repartidor')
+                    ->searchable()
+                    ->default('Sin asignar')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('fecha_pedido')
-                    ->dateTime()
+                TextColumn::make('fecha_pedido')
+                    ->label('Fecha Pedido')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('fecha_entrega')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('fecha_entrega')
+                    ->label('Fecha Entrega')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\BadgeColumn::make('calificacion')
+                BadgeColumn::make('calificacion')
+                    ->label('Calificación')
                     ->color('success')
-                    ->formatStateUsing(fn($state) => $state ? "★ {$state}" : 'Sin calificar'),
+                    ->formatStateUsing(fn($state) => $state ? "★ {$state}" : 'Sin calificar')
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('estado')
@@ -236,14 +339,22 @@ class PedidoResource extends Resource
                                 $data['hasta'],
                                 fn(Builder $query, $date): Builder => $query->whereDate('fecha_pedido', '<=', $date),
                             );
-                    })
+                    }),
+                    
+                SelectFilter::make('repartidor')
+                    ->relationship('repartidor.usuario', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
                 Action::make('cambiar_estado')
                     ->label('Cambiar estado')
                     ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->modalWidth('md')
+                    ->modalHeading('Cambiar estado del pedido')
                     ->form([
                         Select::make('estado')
                             ->options([
@@ -254,11 +365,20 @@ class PedidoResource extends Resource
                                 'cancelado' => 'Cancelado',
                             ])
                             ->required(),
+                            
+                        Select::make('repartidor_id')
+                            ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario')->where('disponible', true))
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->usuario->name)
+                            ->searchable()
+                            ->preload()
+                            ->label('Asignar repartidor')
+                            ->visible(fn ($get) => in_array($get('estado'), ['en_cocina', 'en_camino'])),
                     ])
                     ->action(function (Pedido $record, array $data): void {
                         $record->update([
                             'estado' => $data['estado'],
                             'fecha_entrega' => $data['estado'] === 'entregado' ? now() : $record->fecha_entrega,
+                            'repartidor_id' => $data['repartidor_id'] ?? $record->repartidor_id,
                         ]);
 
                         // Registrar cambio en historial
@@ -275,18 +395,26 @@ class PedidoResource extends Resource
                             ->success()
                             ->send();
                     }),
+                
+                Action::make('ver_detalles')
+                    ->label('Ver detalles')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->color('secondary')
+                    ->modalContent(fn (Pedido $record) => view('filament.pages.pedido-detalles', ['pedido' => $record])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('fecha_pedido', 'desc');
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DetallesRelationManager::class,
+            RelationManagers\HistorialEstadosRelationManager::class,
         ];
     }
 
