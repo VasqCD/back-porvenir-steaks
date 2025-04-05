@@ -122,7 +122,7 @@ class PedidoResource extends Resource
                                         $set('subtotal', $subtotal);
 
                                         // Recalcular total
-                                        $this->calcularTotal($livewire);
+                                        self::calcularTotal($livewire);
                                     }),
 
                                 TextInput::make('precio_unitario')
@@ -264,7 +264,7 @@ class PedidoResource extends Resource
                             'estado_anterior' => $record->getOriginal('estado'),
                             'estado_nuevo' => $data['estado'],
                             'fecha_cambio' => now(),
-                            'usuario_id' => auth()->id(),
+                            'usuario_id' => auth()->id,
                         ]);
 
                         Notification::make()
