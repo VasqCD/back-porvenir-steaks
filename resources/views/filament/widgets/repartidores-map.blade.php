@@ -3,7 +3,7 @@
         <div x-data="repartidoresMap()" x-init="init()" class="w-full h-96">
             <div id="repartidores-map" class="w-full h-full rounded-lg"></div>
             <div class="mt-2 p-2 bg-gray-100 rounded-lg">
-                <h3 class="text-md font-semibold text-gray-700">Repartidores activos: @{{ repartidoresActivos }}</h3>
+                <h3 class="text-md font-semibold text-gray-700">Repartidores activos: <span x-text="repartidoresActivos"></span></h3>
                 <div class="mt-2">
                     <ul class="space-y-1">
                         <template x-for="repartidor in repartidores" :key="repartidor.id">
@@ -54,6 +54,9 @@
                             this.repartidores = data;
                             this.repartidoresActivos = data.length;
                             this.actualizarMarcadores();
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar repartidores:', error);
                         });
                 },
                 
