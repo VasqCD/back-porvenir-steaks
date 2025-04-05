@@ -15,6 +15,12 @@ class PedidosChart extends ChartWidget
     
     protected static ?string $maxHeight = '300px';
     
+    // Añadir este método que falta
+    protected function getType(): string
+    {
+        return 'line';
+    }
+    
     protected function getData(): array
     {
         $data = $this->getPedidoData();
