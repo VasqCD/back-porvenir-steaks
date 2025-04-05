@@ -56,4 +56,12 @@ class Repartidor extends Model
     {
         return $this->hasMany(Pedido::class);
     }
+
+    /**
+     * Relación con pedidos activos (pendientes, en cocina o en camino)
+     */
+    public function pedidosActivos()
+    {
+        return $this->hasMany(Pedido::class)->whereIn('estado', ['pendiente', 'en_cocina', 'en_camino']);
+    }
 }
