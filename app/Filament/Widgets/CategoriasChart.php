@@ -126,6 +126,6 @@ class CategoriasChart extends ChartWidget
     
     public static function canView(): bool
     {
-        return auth()->user()->can('view stats');
+        return true; 
     }
 }
