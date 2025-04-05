@@ -31,9 +31,21 @@
                     <div class="text-gray-600">Fecha de pedido:</div>
                     <div class="font-medium">{{ \Carbon\Carbon::parse($pedido->fecha_pedido)->format('d/m/Y H:i') }}</div>
                     
+                    @if($pedido->fecha_entrega)
+                        <div class="text-gray-600">Fecha de entrega:</div>
+                        <div class="font-medium">{{ \Carbon\Carbon::parse($pedido->fecha_entrega)->format('d/m/Y H:i') }}</div>
+                    @endif
+                    
                     @if($pedido->repartidor)
                         <div class="text-gray-600">Repartidor:</div>
                         <div class="font-medium">{{ $pedido->repartidor->usuario->name }}</div>
+                    @endif
+                    
+                    @if($pedido->calificacion)
+                        <div class="text-gray-600">Calificación:</div>
+                        <div class="font-medium">
+                            @include('filament.components.star-rating', ['rating' => $pedido->calificacion])
+                        </div>
                     @endif
                 </div>
             </div>
@@ -111,13 +123,3 @@
         </div>
     @endif
 </div>
-                    
-                    @if($pedido->calificacion)
-                        <div class="text-gray-600">Calificación:</div>
-                        <div class="font-medium">
-                            @include('filament.components.star-rating', ['rating' => $pedido->calificacion])
-                        </div>
-                    @endiffecha_entrega)
-                        <div class="text-gray-600">Fecha de entrega:</div>
-                        <div class="font-medium">{{ \Carbon\Carbon::parse($pedido->fecha_entrega)->format('d/m/Y H:i') }}</div>
-                    @endif
