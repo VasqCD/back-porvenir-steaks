@@ -79,14 +79,14 @@ class PedidoResource extends Resource
                             ->default(now()),
 
                         DateTimePicker::make('fecha_entrega')
-                            ->hidden(fn ($get) => $get('estado') !== 'entregado'),
+                            ->hidden(fn($get) => $get('estado') !== 'entregado'),
 
                         Select::make('repartidor_id')
-                            ->relationship('repartidor', 'id', fn ($query) => $query->whereHas('usuario'))
+                            ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario'))
                             ->searchable()
                             ->preload()
                             ->label('Repartidor')
-                            ->hidden(fn ($get) => in_array($get('estado'), ['pendiente', 'cancelado'])),
+                            ->hidden(fn($get) => in_array($get('estado'), ['pendiente', 'cancelado'])),
                     ])
                     ->columns(2),
 
@@ -101,7 +101,7 @@ class PedidoResource extends Resource
                                     ->preload()
                                     ->required()
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $livewire) {
                                         $producto = Producto::find($state);
                                         $precioUnitario = $producto ? $producto->precio : 0;
                                         $set('precio_unitario', $precioUnitario);
@@ -109,6 +109,9 @@ class PedidoResource extends Resource
                                         // Obtener la cantidad actual y calcular subtotal
                                         $cantidad = $get('cantidad') ?? 1;
                                         $set('subtotal', $precioUnitario * $cantidad);
+
+                                        // Recalcular el total
+                                        self::calcularTotal($livewire);
                                     }),
 
                                 TextInput::make('cantidad')
@@ -145,7 +148,7 @@ class PedidoResource extends Resource
                                 self::calcularTotal($livewire);
                             })
                     ])
-                    ->visible(fn ($livewire) => $livewire instanceof Pages\CreatePedido || $livewire instanceof Pages\EditPedido),
+                    ->visible(fn($livewire) => $livewire instanceof Pages\CreatePedido || $livewire instanceof Pages\EditPedido),
 
                 Card::make()
                     ->schema([
@@ -161,7 +164,7 @@ class PedidoResource extends Resource
                         Textarea::make('comentario_calificacion')
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn ($record) => $record && $record->estado === 'entregado'),
+                    ->visible(fn($record) => $record && $record->estado === 'entregado'),
             ]);
     }
 
@@ -206,7 +209,7 @@ class PedidoResource extends Resource
 
                 Tables\Columns\BadgeColumn::make('calificacion')
                     ->color('success')
-                    ->formatStateUsing(fn ($state) => $state ? "★ {$state}" : 'Sin calificar'),
+                    ->formatStateUsing(fn($state) => $state ? "★ {$state}" : 'Sin calificar'),
             ])
             ->filters([
                 SelectFilter::make('estado')
@@ -227,11 +230,11 @@ class PedidoResource extends Resource
                         return $query
                             ->when(
                                 $data['desde'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('fecha_pedido', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_pedido', '>=', $date),
                             )
                             ->when(
                                 $data['hasta'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('fecha_pedido', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('fecha_pedido', '<=', $date),
                             );
                     })
             ])
