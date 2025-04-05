@@ -62,7 +62,7 @@ endpoints:
         custom: []
       'productos[].cantidad':
         name: 'productos[].cantidad'
-        description: 'Must be at least 1.'
+        description: 'El tamaño de value debe ser de al menos 1.'
         required: true
         example: 22
         type: integer

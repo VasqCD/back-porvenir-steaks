@@ -3,7 +3,7 @@
 API REST para el sistema de pedidos de El Porvenir Steaks, incluyendo gestión de usuarios, productos, categorías, pedidos, repartidores y más.
 
 <aside>
-    <strong>Base URL</strong>: <code>http://localhost:8000</code>
+    <strong>Base URL</strong>: <code>https://porvenirsteaks.icu/</code>
 </aside>
 
     # Bienvenido a la API de El Porvenir Steaks
