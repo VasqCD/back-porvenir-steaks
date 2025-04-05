@@ -1,39 +1,123 @@
 <x-filament::widget>
-    <x-filament::card>
-        <div class="space-y-2">
-            <div class="flex items-center justify-between gap-8">
-                <h2 class="text-xl font-semibold tracking-tight">
-                    Repartidores activos
-                </h2>
+    <x-filament::section>
+        <div x-data="repartidoresMap()" x-init="init()" class="w-full h-96">
+            <div id="repartidores-map" class="w-full h-full rounded-lg"></div>
+            <div class="mt-2 p-2 bg-gray-100 rounded-lg">
+                <h3 class="text-md font-semibold text-gray-700">Repartidores activos: @{{ repartidoresActivos }}</h3>
+                <div class="mt-2">
+                    <ul class="space-y-1">
+                        <template x-for="repartidor in repartidores" :key="repartidor.id">
+                            <li class="flex items-center gap-2 text-sm">
+                                <span class="h-3 w-3 bg-green-500 rounded-full"></span>
+                                <span x-text="repartidor.usuario.name"></span>
+                                <span class="text-gray-500" x-text="formatLastUpdate(repartidor.ultima_actualizacion)"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
             </div>
-
-            <div id="map" style="height: 400px; width: 100%;"></div>
         </div>
-    </x-filament::card>
+    </x-filament::section>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-
+    @push('scripts')
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key', '') }}&callback=Function.prototype"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Coordenadas centrales de Honduras
-            const map = L.map('map').setView([15.5, -88.0], 8);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // Añadir marcadores para cada repartidor
-            const repartidores = @json($this->getRepartidores());
-
-            repartidores.forEach(function(repartidor) {
-                const marker = L.marker([repartidor.ultima_ubicacion_lat, repartidor.ultima_ubicacion_lng]).addTo(map);
-                marker.bindPopup(`
-                    <strong>${repartidor.usuario.name}</strong><br>
-                    Teléfono: ${repartidor.usuario.telefono || 'No disponible'}<br>
-                    Última actualización: ${new Date(repartidor.ultima_actualizacion).toLocaleString()}
-                `);
-            });
-        });
+        function repartidoresMap() {
+            return {
+                map: null,
+                markers: [],
+                repartidores: [],
+                repartidoresActivos: 0,
+                
+                init() {
+                    // Inicializar el mapa (ubicación central de Honduras)
+                    this.map = new google.maps.Map(document.getElementById('repartidores-map'), {
+                        center: { lat: 14.0723, lng: -87.1921 },
+                        zoom: 13,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+                        mapTypeControl: true,
+                        streetViewControl: true,
+                        fullscreenControl: true
+                    });
+                    
+                    // Cargar los datos de repartidores
+                    this.cargarRepartidores();
+                    
+                    // Actualizar cada 30 segundos
+                    setInterval(() => this.cargarRepartidores(), 30000);
+                },
+                
+                cargarRepartidores() {
+                    fetch('/admin/api/repartidores-disponibles')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.repartidores = data;
+                            this.repartidoresActivos = data.length;
+                            this.actualizarMarcadores();
+                        });
+                },
+                
+                actualizarMarcadores() {
+                    // Remover marcadores anteriores
+                    this.markers.forEach(marker => marker.setMap(null));
+                    this.markers = [];
+                    
+                    // Añadir nuevos marcadores
+                    this.repartidores.forEach(repartidor => {
+                        if (repartidor.ultima_ubicacion_lat && repartidor.ultima_ubicacion_lng) {
+                            const position = {
+                                lat: parseFloat(repartidor.ultima_ubicacion_lat),
+                                lng: parseFloat(repartidor.ultima_ubicacion_lng)
+                            };
+                            
+                            const marker = new google.maps.Marker({
+                                position: position,
+                                map: this.map,
+                                title: repartidor.usuario.name,
+                                icon: {
+                                    url: '/images/moto-icon.png',
+                                    scaledSize: new google.maps.Size(32, 32)
+                                }
+                            });
+                            
+                            const infoWindow = new google.maps.InfoWindow({
+                                content: `
+                                    <div class="p-2">
+                                        <strong>${repartidor.usuario.name}</strong><br>
+                                        Teléfono: ${repartidor.usuario.telefono || 'N/A'}<br>
+                                        Última actualización: ${this.formatLastUpdate(repartidor.ultima_actualizacion)}
+                                    </div>
+                                `
+                            });
+                            
+                            marker.addListener('click', () => {
+                                infoWindow.open(this.map, marker);
+                            });
+                            
+                            this.markers.push(marker);
+                        }
+                    });
+                    
+                    // Centrar mapa si hay marcadores
+                    if (this.markers.length > 0) {
+                        const bounds = new google.maps.LatLngBounds();
+                        this.markers.forEach(marker => bounds.extend(marker.getPosition()));
+                        this.map.fitBounds(bounds);
+                        
+                        // Ajustar zoom si solo hay un marcador
+                        if (this.markers.length === 1) {
+                            this.map.setZoom(15);
+                        }
+                    }
+                },
+                
+                formatLastUpdate(datetime) {
+                    if (!datetime) return 'No disponible';
+                    const date = new Date(datetime);
+                    return date.toLocaleString();
+                }
+            }
+        }
     </script>
+    @endpush
 </x-filament::widget>
