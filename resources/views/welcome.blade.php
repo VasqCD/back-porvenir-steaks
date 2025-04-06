@@ -161,7 +161,7 @@
                         Los Mejores Cortes de Carne a Tu Puerta
                     </h1>
                     <p class="text-xl text-secondary-800 dark:text-secondary-200 mb-8 text-shadow">
-                        Disfruta de la experiencia premium de carne de la mejor calidad, preparada por expertos y entregada directamente a tu ubicación.
+                        Disfruta de la experiencia premium de comida de la mejor calidad, preparada por expertos y entregada directamente a tu ubicación.
                     </p>
                     <div class="flex flex-col sm:flex-row justify-center gap-4">
                         <a href="#menu" class="btn-primary">
@@ -185,9 +185,9 @@
         <section id="menu" class="section-padding bg-white dark:bg-secondary-950">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl md:text-4xl font-display font-bold mb-4 text-secondary-900 dark:text-white">Nuestros Cortes Destacados</h2>
+                    <h2 class="text-3xl md:text-4xl font-display font-bold mb-4 text-secondary-900 dark:text-white">Nuestros platos Destacados</h2>
                     <p class="text-lg text-secondary-700 dark:text-secondary-300 max-w-3xl mx-auto">
-                        Seleccionamos los mejores cortes de carne para brindarte una experiencia gastronómica única.
+                        Seleccionamos los mejores platos para brindarte una experiencia gastronómica única.
                     </p>
                 </div>
                 
@@ -203,11 +203,11 @@
                         <div class="card-body">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h3 class="text-xl font-bold text-secondary-900 dark:text-white">T-Bone Steak</h3>
-                                    <p class="text-secondary-700 dark:text-secondary-300 mt-1">Corte premium de 16oz</p>
+                                    <h3 class="text-xl font-bold text-secondary-900 dark:text-white">Parrillada 4 personas</h3>
+                                    <p class="text-secondary-700 dark:text-secondary-300 mt-1">Incluido todos los complementos</p>
                                 </div>
                                 <div class="text-primary-600 dark:text-primary-500 font-bold">
-                                    L 350.00
+                                    L 400.00
                                 </div>
                             </div>
                             <div class="mt-4">
@@ -216,9 +216,6 @@
                                 </button>
                             </div>
                         </div>
-                        <p class="text-secondary-700 dark:text-secondary-300">
-                            "¡Los mejores cortes que he probado! La carne llegó en perfecto estado y la app es muy fácil de usar. El repartidor fue muy amable."
-                        </p>
                         <div class="mt-4 text-primary-600 dark:text-primary-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
