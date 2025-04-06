@@ -249,7 +249,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="text-xl font-bold text-secondary-900 dark:text-white">Ribeye Steak</h3>
-                                <p class="text-secondary-700 dark:text-secondary-300 mt-1">Corte jugoso de 12oz</p>
+                                <p class="text-secondary-700 dark:text-secondary-300 mt-1">Corte jugoso de carne 12oz</p>
                             </div>
                             <div class="text-primary-600 dark:text-primary-500 font-bold">
                                 L 280.00
@@ -271,13 +271,12 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="text-xl font-bold text-secondary-900 dark:text-white">New York Steak</h3>
-                                <p class="text-secondary-700 dark:text-secondary-300 mt-1">Corte fino de 10oz</p>
+                                <p class="text-secondary-700 dark:text-secondary-300 mt-1">Corte jugos de costilla</p>
                             </div>
                             <div class="text-primary-600 dark:text-primary-500 font-bold">
                                 L 260.00
                             </div>
                         </div>
-                        >
                     </div>
                 </div>
             </div>
