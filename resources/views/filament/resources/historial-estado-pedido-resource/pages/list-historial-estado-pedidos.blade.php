@@ -1,3 +1,4 @@
+@vite('resources/css/app.css')
 {{-- resources/views/filament/resources/historial-estado-pedido-resource/pages/list-historial-estado-pedidos.blade.php --}}
 <x-filament::page>
     {{ $this->table }}

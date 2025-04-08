@@ -1,3 +1,4 @@
+@vite('resources/css/app.css')
 <x-filament::section>
     <x-slot name="heading">
         Historial del pedido
