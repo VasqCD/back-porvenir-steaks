@@ -19,4 +19,11 @@ class PedidoHistorialWidget extends Widget
     {
         $this->record = $record;
     }
+
+    public static function getStyles(): array
+{
+    return [
+        'resources/css/historial-estados.css', // Solo para este componente
+    ];
+}
 }
