@@ -5,10 +5,10 @@
     <x-filament::form wire:submit.prevent="create">
         {{ $this->form }}
 
-        <x-filament::form.actions
-            :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
-        />
+        <x-filament-actions::actions
+    :actions="$this->getCachedFormActions()"
+    :full-width="$this->hasFullWidthFormActions()"
+/>
     </x-filament::form>
     
     <x-filament::section class="mt-6">
