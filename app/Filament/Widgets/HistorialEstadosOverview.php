@@ -56,4 +56,11 @@ class HistorialEstadosOverview extends BaseWidget
                 ->chart([$cancelados]),
         ];
     }
+
+    public static function getStyles(): array
+{
+    return [
+        'resources/css/historial-estados.css', // Solo para este componente
+    ];
+}
 }
