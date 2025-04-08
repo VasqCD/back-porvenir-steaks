@@ -12,8 +12,6 @@ class CreateHistorialEstadoPedido extends CreateRecord
 {
     protected static string $resource = HistorialEstadoPedidoResource::class;
     
-    protected static string $view = 'filament.resources.historial-estado-pedido-resource.pages.create-historial-estado-pedido';
-    
     protected function afterCreate(): void
     {
         // Actualizar el estado del pedido
@@ -34,5 +32,12 @@ class CreateHistorialEstadoPedido extends CreateRecord
                 ->success()
                 ->send();
         }
+    }
+    
+    protected function getFooterWidgets(): array
+    {
+        return [
+            HistorialEstadoPedidoResource\Widgets\InstruccionesWidget::class,
+        ];
     }
 }

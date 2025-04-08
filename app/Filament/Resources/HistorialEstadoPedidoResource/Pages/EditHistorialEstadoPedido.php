@@ -9,8 +9,6 @@ use Filament\Resources\Pages\EditRecord;
 class EditHistorialEstadoPedido extends EditRecord
 {
     protected static string $resource = HistorialEstadoPedidoResource::class;
-    
-    protected static string $view = 'filament.resources.historial-estado-pedido-resource.pages.edit-historial-estado-pedido';
 
     protected function getHeaderActions(): array
     {
@@ -39,5 +37,12 @@ class EditHistorialEstadoPedido extends EditRecord
                 ]);
             }
         }
+    }
+    
+    protected function getFooterWidgets(): array
+    {
+        return [
+            HistorialEstadoPedidoResource\Widgets\PedidoHistorialWidget::class,
+        ];
     }
 }
