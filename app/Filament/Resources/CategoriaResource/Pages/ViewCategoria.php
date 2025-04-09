@@ -4,19 +4,18 @@ namespace App\Filament\Resources\CategoriaResource\Pages;
 
 use App\Filament\Resources\CategoriaResource;
 use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
 
-class EditCategoria extends EditRecord
+class ViewCategoria extends ViewRecord
 {
     protected static string $resource = CategoriaResource::class;
-
+    
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make()
-                ->icon('heroicon-o-eye')
-                ->tooltip('Ver detalles de la categoría'),
+            Actions\EditAction::make()
+                ->icon('heroicon-o-pencil')
+                ->tooltip('Editar esta categoría'),
                 
             Actions\Action::make('verProductos')
                 ->label('Ver productos')
@@ -30,18 +29,5 @@ class EditCategoria extends EditRecord
                 ->icon('heroicon-o-trash')
                 ->tooltip('Eliminar esta categoría'),
         ];
-    }
-    
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
-    
-    protected function getSavedNotification(): ?Notification
-    {
-        return Notification::make()
-            ->success()
-            ->title('Categoría actualizada')
-            ->body('La categoría ha sido actualizada correctamente.');
     }
 }

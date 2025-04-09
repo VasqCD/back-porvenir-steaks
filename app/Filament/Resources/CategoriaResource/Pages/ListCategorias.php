@@ -13,7 +13,17 @@ class ListCategorias extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->icon('heroicon-o-plus-circle')
+                ->label('Nueva categoría')
+                ->tooltip('Crear una nueva categoría de productos'),
+        ];
+    }
+    
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\CategoriasOverview::class,
         ];
     }
 }
