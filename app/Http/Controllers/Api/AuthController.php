@@ -124,6 +124,11 @@ class AuthController extends Controller
      *        "email": ["Las credenciales proporcionadas son incorrectas."]
      *    }
      * }
+     * 
+     * @response 403 {
+     *   "message": "Debe verificar su correo electrónico antes de iniciar sesión.",
+     *  "verification_required": true,
+     * 
      */
     public function login(Request $request)
     {
@@ -138,6 +143,15 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales proporcionadas son incorrectas.'],
             ]);
+        }
+
+        // Verificar si el email ha sido verificado
+        if ($user->email_verified_at === null) {
+            return response()->json([
+                'message' => 'Debe verificar su correo electrónico antes de iniciar sesión.',
+                'verification_required' => true,
+                'email' => $user->email
+            ], 403);
         }
 
         // Actualizar última conexión
