@@ -66,20 +66,27 @@ class AuthController extends Controller
             'apellido' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'telefono' => 'nullable|string|max:20|unique:users|regex:/^\+504\s[0-9]{4}-[0-9]{4}$/',
+            'telefono' => 'nullable|string|size:8|regex:/^[0-9]{8}$/|unique:users',
         ], [
             'email.unique' => 'El correo electrónico ya ha sido registrado.',
             'telefono.unique' => 'El número telefónico ya ha sido registrado.',
-            'telefono.regex' => 'El formato del teléfono no es válido. Ejemplo: +504 9999-9999',
+            'telefono.regex' => 'El teléfono debe contener 8 dígitos numéricos.',
+            'telefono.size' => 'El teléfono debe tener exactamente 8 dígitos.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
         ]);
+
+        // Formatear número de teléfono (si se proporciona)
+        $telefono = null;
+        if ($request->telefono) {
+            $telefono = '+504 ' . substr($request->telefono, 0, 4) . '-' . substr($request->telefono, 4, 4);
+        }
 
         $user = User::create([
             'name' => $request->name,
             'apellido' => $request->apellido,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'telefono' => $request->telefono,
+            'telefono' => $telefono,
             'rol' => 'cliente', // Por defecto es un cliente
             'fecha_registro' => now(),
         ]);
