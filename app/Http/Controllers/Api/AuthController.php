@@ -66,7 +66,12 @@ class AuthController extends Controller
             'apellido' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'telefono' => 'nullable|string|max:20',
+            'telefono' => 'nullable|string|max:20|unique:users|regex:/^\+504\s[0-9]{4}-[0-9]{4}$/',
+        ], [
+            'email.unique' => 'El correo electrónico ya ha sido registrado.',
+            'telefono.unique' => 'El número telefónico ya ha sido registrado.',
+            'telefono.regex' => 'El formato del teléfono no es válido. Ejemplo: +504 9999-9999',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
         ]);
 
         $user = User::create([
