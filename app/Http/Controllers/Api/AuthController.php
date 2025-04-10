@@ -433,6 +433,49 @@ class AuthController extends Controller
     }
 
     /**
+     * Subir foto de perfil
+     *
+     * Recibe la imagen, la valida, la almacena y actualiza el campo "foto_perfil" del usuario.
+     *
+     * @authenticated
+     *
+     * @bodyParam foto_perfil file required Imagen de perfil (jpeg,png,jpg, máximo: 2MB).
+     *
+     * @response {
+     *    "message": "Foto de perfil actualizada correctamente",
+     *    "user": {
+     *        "id": 1,
+     *        "name": "Juan Pérez",
+     *        "apellido": "González",
+     *        "email": "usuario@ejemplo.com",
+     *        "telefono": "+504 9999-9999",
+     *        "foto_perfil": "perfiles/usuario1_actualizado.jpg"
+     *    }
+     * }
+     */
+    public function uploadPhoto(Request $request)
+    {
+        $user = $request->user();
+
+        // Validar la imagen
+        $request->validate([
+            'foto_perfil' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        // Almacenar la imagen en el directorio "perfiles" dentro de "public"
+        $path = $request->file('foto_perfil')->store('perfiles', 'public');
+
+        // Actualizar el campo en el modelo y guardar
+        $user->foto_perfil = $path;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Foto de perfil actualizada correctamente',
+            'user' => $user,
+        ]);
+    }
+
+    /**
      * Cerrar sesión
      *
      * Cierra la sesión del usuario eliminando el token de acceso actual.

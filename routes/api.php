@@ -85,6 +85,8 @@ Route::middleware('api.throttle:api,60')->group(function () {
         Route::get('/user', [AuthController::class, 'perfil']);
         Route::post('/user/update', [AuthController::class, 'actualizarPerfil']);
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/user/upload-photo', [AuthController::class, 'uploadPhoto']);
+
 
         /**
          * Ubicaciones
