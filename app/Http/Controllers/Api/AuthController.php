@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\Notificacion;
+use App\Services\FcmService;
 
 /**
  * @group Autenticación y Gestión de Usuarios
@@ -19,11 +20,14 @@ use App\Models\Notificacion;
 class AuthController extends Controller
 {
     protected $authService;
+    protected $fcmService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService, FcmService $fcmService)
     {
         $this->authService = $authService;
+        $this->fcmService = $fcmService;
     }
+
 
     /**
      * Registro de usuario
@@ -498,16 +502,25 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Crear notificación para los administradores
+        // Obtener administradores
         $admins = User::where('rol', 'administrador')->get();
 
-        foreach ($admins as $admin) {
+        // Si no hay administradores, crear al menos la notificación en la base de datos
+        if ($admins->isEmpty()) {
             Notificacion::create([
-                'usuario_id' => $admin->id,
-                'titulo' => 'Nueva solicitud de repartidor',
-                'mensaje' => "El usuario {$user->name} {$user->apellido} ha solicitado ser repartidor",
+                'usuario_id' => $user->id, // Al mismo usuario como respaldo
+                'titulo' => 'Solicitud de repartidor enviada',
+                'mensaje' => "Tu solicitud para ser repartidor ha sido enviada",
                 'tipo' => 'solicitud_repartidor',
             ]);
+        } else {
+            // Enviar notificación a cada administrador
+            foreach ($admins as $admin) {
+                // Usar el método especializado en lugar del genérico
+                if (isset($this->fcmService)) {
+                    $this->fcmService->sendRepartidorRequestNotification($admin, $user);
+                }
+            }
         }
 
         return response()->json([

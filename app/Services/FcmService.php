@@ -114,7 +114,36 @@ class FcmService
     }
 
     /**
-     * Método de envío a tokens específicos
+     * Enviar notificación de solicitud de repartidor
+     * 
+     * @param User $admin Administrador que recibirá la notificación
+     * @param User $solicitante Usuario que solicita ser repartidor
+     * @return mixed Resultado de la notificación
+     */
+    public function sendRepartidorRequestNotification(User $admin, User $solicitante)
+    {
+        $title = 'Nueva solicitud de repartidor';
+        $body = "El usuario {$solicitante->name} ha solicitado ser repartidor";
+        $data = [
+            'type' => 'solicitud_repartidor',
+            'usuario_id' => $solicitante->id,
+        ];
+
+        // Crear notificación en la base de datos
+        Notificacion::create([
+            'usuario_id' => $admin->id,
+            'titulo' => $title,
+            'mensaje' => $body,
+            'tipo' => 'solicitud_repartidor',
+            'leida' => false
+        ]);
+
+        // Enviar notificación push
+        return $this->sendNotification($admin, $title, $body, $data);
+    }
+
+    /**
+     * Método de envío a tokens específicos usando Firebase SDK
      */
     private function sendToTokens(array $tokens, string $title, string $body, array $data = [])
     {
@@ -144,6 +173,54 @@ class FcmService
         } catch (\Exception $e) {
             Log::error('Firebase error: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Método alternativo de envío para casos donde el SDK no funcione
+     * Este método usa directamente la API HTTP de FCM
+     */
+    public function sendNotificationToTokens(array $tokens, array $data)
+    {
+        if (empty($tokens)) {
+            return false;
+        }
+
+        $serverKey = config('services.fcm.server_key');
+        if (empty($serverKey)) {
+            Log::warning('FCM server key no está configurada. Usando el método de SDK.');
+            return $this->sendToTokens($tokens, $data['title'], $data['body'], $data['data'] ?? []);
+        }
+
+        $client = new \GuzzleHttp\Client();
+
+        $message = [
+            'registration_ids' => $tokens,
+            'notification' => [
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'sound' => 'default',
+            ],
+            'data' => $data['data'] ?? [],
+            'priority' => 'high',
+        ];
+
+        try {
+            $response = $client->post('https://fcm.googleapis.com/fcm/send', [
+                'headers' => [
+                    'Authorization' => 'key=' . $serverKey,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $message,
+            ]);
+
+            $result = json_decode($response->getBody()->getContents(), true);
+            Log::info('FCM notification sent via HTTP API', ['result' => $result]);
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Error al enviar notificación FCM via HTTP API: ' . $e->getMessage());
+            // Intentar con el método SDK como fallback
+            return $this->sendToTokens($tokens, $data['title'], $data['body'], $data['data'] ?? []);
         }
     }
 }

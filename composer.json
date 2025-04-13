@@ -10,6 +10,7 @@
         "bezhansalleh/filament-shield": "^3.3",
         "cheesegrits/filament-google-maps": "^3.0",
         "filament/filament": "3.3",
+        "google/auth": "^1.46",
         "knuckleswtf/scribe": "^5.1",
         "kreait/laravel-firebase": "^6.0",
         "laravel-lang/lang": "^15.19",

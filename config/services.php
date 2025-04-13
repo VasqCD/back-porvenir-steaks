@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -35,4 +34,11 @@ return [
         ],
     ],
 
+    'firebase' => [
+        'credentials_path' => env('FIREBASE_CREDENTIALS', 'storage/app/private/firebase-credentials.json'),
+    ],
+    
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+    ],
 ];
