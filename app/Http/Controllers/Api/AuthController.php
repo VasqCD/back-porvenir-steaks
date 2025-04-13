@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Models\Notificacion;
 
 /**
  * @group Autenticación y Gestión de Usuarios
@@ -472,6 +473,45 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Foto de perfil actualizada correctamente',
             'user' => $user,
+        ]);
+    }
+
+    /**
+     * Solicitar convertirse en repartidor
+     *
+     * Permite a un cliente solicitar convertirse en repartidor.
+     *
+     * @response {
+     *    "message": "Solicitud enviada exitosamente"
+     * }
+     *
+     * @authenticated
+     */
+    public function solicitarSerRepartidor(Request $request)
+    {
+        $user = $request->user();
+
+        // Verificar que el usuario sea cliente
+        if ($user->rol !== 'cliente') {
+            return response()->json([
+                'message' => 'Solo los clientes pueden solicitar ser repartidores'
+            ], 422);
+        }
+
+        // Crear notificación para los administradores
+        $admins = User::where('rol', 'administrador')->get();
+
+        foreach ($admins as $admin) {
+            Notificacion::create([
+                'usuario_id' => $admin->id,
+                'titulo' => 'Nueva solicitud de repartidor',
+                'mensaje' => "El usuario {$user->name} {$user->apellido} ha solicitado ser repartidor",
+                'tipo' => 'solicitud_repartidor',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Solicitud enviada exitosamente'
         ]);
     }
 
