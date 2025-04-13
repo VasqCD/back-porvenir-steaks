@@ -86,6 +86,7 @@ Route::middleware('api.throttle:api,60')->group(function () {
         Route::post('/user/update', [AuthController::class, 'actualizarPerfil']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/user/upload-photo', [AuthController::class, 'uploadPhoto']);
+        Route::post('/user/solicitar-repartidor', [AuthController::class, 'solicitarSerRepartidor']);
 
 
         /**
