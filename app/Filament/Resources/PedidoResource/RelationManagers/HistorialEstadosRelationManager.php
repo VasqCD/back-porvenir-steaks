@@ -9,13 +9,14 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Services\FcmService;
 
 class HistorialEstadosRelationManager extends RelationManager
 {
     protected static string $relationship = 'historialEstados';
 
     protected static ?string $recordTitleAttribute = 'estado_nuevo';
-    
+
     protected static ?string $title = 'Historial de estados';
 
     public function form(Form $form): Form
@@ -32,18 +33,18 @@ class HistorialEstadosRelationManager extends RelationManager
                         'cancelado' => 'Cancelado',
                     ])
                     ->required(),
-                
+
                 Forms\Components\DateTimePicker::make('fecha_cambio')
                     ->label('Fecha de cambio')
                     ->required()
                     ->default(now()),
-                
+
                 Forms\Components\Select::make('usuario_id')
                     ->label('Usuario que realizó el cambio')
                     ->relationship('usuario', 'name')
                     ->searchable()
                     ->required(),
-                
+
                 Forms\Components\TextInput::make('estado_anterior')
                     ->label('Estado anterior')
                     ->disabled(),
@@ -57,7 +58,7 @@ class HistorialEstadosRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('estado_anterior')
                     ->label('Estado anterior')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pendiente' => 'warning',
                         'en_cocina' => 'primary',
                         'en_camino' => 'secondary',
@@ -65,11 +66,11 @@ class HistorialEstadosRelationManager extends RelationManager
                         'cancelado' => 'danger',
                         default => 'gray',
                     }),
-                
+
                 Tables\Columns\TextColumn::make('estado_nuevo')
                     ->label('Nuevo estado')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pendiente' => 'warning',
                         'en_cocina' => 'primary',
                         'en_camino' => 'secondary',
@@ -77,12 +78,12 @@ class HistorialEstadosRelationManager extends RelationManager
                         'cancelado' => 'danger',
                         default => 'gray',
                     }),
-                
+
                 Tables\Columns\TextColumn::make('fecha_cambio')
                     ->label('Fecha de cambio')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('usuario.name')
                     ->label('Cambiado por')
                     ->searchable(),
@@ -95,15 +96,28 @@ class HistorialEstadosRelationManager extends RelationManager
                     ->mutateFormDataUsing(function (array $data, $livewire): array {
                         $pedido = $livewire->getOwnerRecord();
                         $data['estado_anterior'] = $pedido->estado;
-                        
+
                         // También actualizar el estado del pedido
                         $pedido->update(['estado' => $data['estado_nuevo']]);
-                        
+
                         // Si el estado es "entregado", actualizar la fecha de entrega
                         if ($data['estado_nuevo'] === 'entregado') {
                             $pedido->update(['fecha_entrega' => now()]);
                         }
-                        
+
+                        // Enviar notificación push al usuario
+                        try {
+                            $fcmService = app(FcmService::class);
+                            $fcmService->sendPedidoStatusNotification(
+                                $pedido->usuario,
+                                (string) $pedido->id,
+                                $data['estado_nuevo']
+                            );
+                        } catch (\Exception $e) {
+                            // Registrar el error pero continuar
+                            \Illuminate\Support\Facades\Log::error('Error al enviar notificación: ' . $e->getMessage());
+                        }
+
                         return $data;
                     }),
             ])

@@ -33,19 +33,21 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Services\FcmService;
+
 
 class PedidoResource extends Resource
 {
     protected static ?string $model = Pedido::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
-    
+
     protected static ?string $navigationLabel = 'Pedidos';
-    
+
     protected static ?string $navigationGroup = 'Operaciones';
-    
+
     protected static ?int $navigationSort = 1;
-    
+
     protected static ?string $recordTitleAttribute = 'id';
 
     public static function form(Form $form): Form
@@ -92,7 +94,7 @@ class PedidoResource extends Resource
                                                 }
                                             })
                                             ->columnSpan(1),
-                                            
+
                                         Grid::make(2)
                                             ->schema([
                                                 DateTimePicker::make('fecha_pedido')
@@ -107,7 +109,7 @@ class PedidoResource extends Resource
 
                                         Select::make('repartidor_id')
                                             ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario'))
-                                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->usuario->name)
+                                            ->getOptionLabelFromRecordUsing(fn($record) => $record->usuario->name)
                                             ->searchable()
                                             ->preload()
                                             ->label('Repartidor')
@@ -124,7 +126,7 @@ class PedidoResource extends Resource
                                             ->numeric()
                                             ->prefix('L')
                                             ->helperText('15% de impuesto incluido'),
-                                            
+
                                         Placeholder::make('subtotal')
                                             ->label('Subtotal')
                                             ->content(function ($get, $record) {
@@ -134,7 +136,7 @@ class PedidoResource extends Resource
                                                 }
                                                 return 'L 0.00';
                                             }),
-                                            
+
                                         Placeholder::make('impuesto')
                                             ->label('Impuesto (15%)')
                                             ->content(function ($get, $record) {
@@ -210,8 +212,8 @@ class PedidoResource extends Resource
                             ->afterStateUpdated(function (array $state, callable $set, $livewire) {
                                 self::calcularTotal($livewire);
                             })
-                            ->itemLabel(fn (array $state): ?string => 
-                                $state['producto_id'] ? Producto::find($state['producto_id'])?->nombre ?? 'Producto' : 'Nuevo producto')
+                            ->itemLabel(fn(array $state): ?string =>
+                            $state['producto_id'] ? Producto::find($state['producto_id'])?->nombre ?? 'Producto' : 'Nuevo producto')
                             ->collapsible()
                             ->reorderable()
                             ->cloneable()
@@ -234,17 +236,17 @@ class PedidoResource extends Resource
                             ->disabled(),
                     ])
                     ->visible(fn($record) => $record && $record->estado === 'entregado'),
-                    
+
                 Card::make()
                     ->schema([
                         Placeholder::make('historial_title')
                             ->label('Historial de Estados')
-                            ->content(fn ($record) => $record ? '' : 'El historial estará disponible después de guardar'),
-                            
+                            ->content(fn($record) => $record ? '' : 'El historial estará disponible después de guardar'),
+
                         Placeholder::make('historial')
                             ->content(function ($record) {
                                 if (!$record) return null;
-                                
+
                                 return view('filament.components.historial-estados', [
                                     'historial' => $record->historialEstados()->with('usuario')->orderBy('fecha_cambio', 'desc')->get()
                                 ]);
@@ -290,7 +292,7 @@ class PedidoResource extends Resource
                     ->money('HNL')
                     ->label('Total')
                     ->sortable(),
-                    
+
                 TextColumn::make('repartidor.usuario.name')
                     ->label('Repartidor')
                     ->searchable()
@@ -340,7 +342,7 @@ class PedidoResource extends Resource
                                 fn(Builder $query, $date): Builder => $query->whereDate('fecha_pedido', '<=', $date),
                             );
                     }),
-                    
+
                 SelectFilter::make('repartidor')
                     ->relationship('repartidor.usuario', 'name')
                     ->searchable()
@@ -365,16 +367,18 @@ class PedidoResource extends Resource
                                 'cancelado' => 'Cancelado',
                             ])
                             ->required(),
-                            
+
                         Select::make('repartidor_id')
                             ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario')->where('disponible', true))
-                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->usuario->name)
+                            ->getOptionLabelFromRecordUsing(fn($record) => $record->usuario->name)
                             ->searchable()
                             ->preload()
                             ->label('Asignar repartidor')
-                            ->visible(fn ($get) => in_array($get('estado'), ['en_cocina', 'en_camino'])),
+                            ->visible(fn($get) => in_array($get('estado'), ['en_cocina', 'en_camino'])),
                     ])
                     ->action(function (Pedido $record, array $data): void {
+                        $estadoAnterior = $record->estado;
+
                         $record->update([
                             'estado' => $data['estado'],
                             'fecha_entrega' => $data['estado'] === 'entregado' ? now() : $record->fecha_entrega,
@@ -384,23 +388,43 @@ class PedidoResource extends Resource
                         // Registrar cambio en historial
                         HistorialEstadoPedido::create([
                             'pedido_id' => $record->id,
-                            'estado_anterior' => $record->getOriginal('estado'),
+                            'estado_anterior' => $estadoAnterior,
                             'estado_nuevo' => $data['estado'],
                             'fecha_cambio' => now(),
                             'usuario_id' => auth()->id(),
                         ]);
 
-                        Notification::make()
-                            ->title('Estado actualizado')
-                            ->success()
-                            ->send();
+                        // Enviar notificación push al usuario
+                        try {
+                            $fcmService = app(FcmService::class);
+                            $fcmService->sendPedidoStatusNotification(
+                                $record->usuario,
+                                (string) $record->id,
+                                $data['estado']
+                            );
+
+                            Notification::make()
+                                ->title('Estado actualizado')
+                                ->body('Se ha enviado una notificación al cliente')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            // Registrar el error pero continuar
+                            \Illuminate\Support\Facades\Log::error('Error al enviar notificación: ' . $e->getMessage());
+
+                            Notification::make()
+                                ->title('Estado actualizado')
+                                ->body('Pero hubo un problema al enviar la notificación al cliente')
+                                ->warning()
+                                ->send();
+                        }
                     }),
-                
+
                 Action::make('ver_detalles')
                     ->label('Ver detalles')
                     ->icon('heroicon-o-clipboard-document-list')
                     ->color('secondary')
-                    ->modalContent(fn (Pedido $record) => view('filament.pages.pedido-detalles', ['pedido' => $record])),
+                    ->modalContent(fn(Pedido $record) => view('filament.pages.pedido-detalles', ['pedido' => $record])),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
