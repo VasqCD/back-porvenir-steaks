@@ -34,6 +34,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Services\FcmService;
+use App\Models\Notificacion;
 
 
 class PedidoResource extends Resource
@@ -418,6 +419,42 @@ class PedidoResource extends Resource
                                 ->warning()
                                 ->send();
                         }
+                    }),
+
+                Action::make('asignar_repartidor')
+                    ->label('Asignar repartidor')
+                    ->icon('heroicon-o-user')
+                    ->color('primary')
+                    ->modalWidth('md')
+                    ->modalHeading('Asignar repartidor al pedido')
+                    ->form([
+                        Select::make('repartidor_id')
+                            ->relationship('repartidor', 'id', fn($query) => $query->whereHas('usuario')->where('disponible', true))
+                            ->getOptionLabelFromRecordUsing(fn($record) => $record->usuario->name)
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->label('Repartidor'),
+                    ])
+                    ->visible(fn($record) => in_array($record->estado, ['pendiente', 'en_cocina']) && !$record->repartidor_id)
+                    ->action(function (Pedido $record, array $data): void {
+                        $record->update([
+                            'repartidor_id' => $data['repartidor_id'],
+                        ]);
+
+                        // Crear notificación para el cliente
+                        Notificacion::create([
+                            'usuario_id' => $record->usuario_id,
+                            'pedido_id' => $record->id,
+                            'titulo' => 'Repartidor asignado',
+                            'mensaje' => 'Se ha asignado un repartidor a tu pedido. Pronto estará en camino.',
+                            'tipo' => 'repartidor_asignado',
+                        ]);
+
+                        Notification::make()
+                            ->title('Repartidor asignado')
+                            ->success()
+                            ->send();
                     }),
 
                 Action::make('ver_detalles')
