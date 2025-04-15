@@ -100,7 +100,19 @@ class UserResource extends Resource
                                         'administrador' => 'Administrador',
                                     ])
                                     ->required()
-                                    ->default('cliente'),
+                                    ->default('cliente')
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, $set, $get, $livewire) {
+                                        if ($state === 'repartidor') {
+                                            // Mostrar un mensaje informativo cuando se cambia a repartidor
+                                            Notification::make()
+                                                ->title('Información sobre repartidores')
+                                                ->body('Al guardar, se creará un perfil de repartidor y se utilizarán las coordenadas de la ubicación principal si están disponibles.')
+                                                ->info()
+                                                ->persistent()
+                                                ->send();
+                                        }
+                                    }),
 
                                 TextInput::make('password')
                                     ->label('Contraseña')

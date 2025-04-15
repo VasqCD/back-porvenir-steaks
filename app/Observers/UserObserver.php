@@ -5,6 +5,9 @@ namespace App\Observers;
 use App\Models\User;
 use App\Models\Repartidor;
 use App\Models\Ubicacion;
+use App\Models\Notificacion;
+use App\Services\FcmService;
+use Illuminate\Support\Facades\App;
 
 class UserObserver
 {
@@ -29,14 +32,26 @@ class UserObserver
      */
     public function updated(User $user): void
     {
-        // Si el campo 'rol' ha cambiado, actualizar roles
+        // Si el campo 'rol' ha cambiado
         if ($user->isDirty('rol')) {
+            // El rol anterior
+            $rolAnterior = $user->getOriginal('rol');
+            
+            // El nuevo rol
+            $nuevoRol = $user->rol;
+            
             // Eliminar roles anteriores
-            $user->syncRoles([$user->rol]);
+            $user->syncRoles([$nuevoRol]);
             
             // Si cambió a repartidor, crear perfil de repartidor
-            if ($user->rol === 'repartidor' && !$user->repartidor) {
+            if ($nuevoRol === 'repartidor' && $rolAnterior !== 'repartidor') {
                 $this->crearPerfilRepartidor($user);
+                $this->notificarCambioRol($user, 'repartidor');
+            }
+            
+            // Si era repartidor y ahora es otro rol, también notificar
+            if ($rolAnterior === 'repartidor' && $nuevoRol !== 'repartidor') {
+                $this->notificarCambioRol($user, $nuevoRol);
             }
         }
     }
@@ -74,6 +89,64 @@ class UserObserver
         }
         
         $repartidor->save();
+    }
+    
+    /**
+     * Notificar al usuario sobre el cambio de rol
+     */
+    private function notificarCambioRol(User $user, string $nuevoRol): void
+    {
+        // Preparar los mensajes según el rol
+        $mensajes = [
+            'repartidor' => [
+                'titulo' => '¡Ahora eres repartidor!',
+                'mensaje' => 'Tu cuenta ha sido actualizada con acceso de repartidor. Ya puedes empezar a entregar pedidos.',
+                'tipo' => 'cambio_rol'
+            ],
+            'cliente' => [
+                'titulo' => 'Cambio de rol en tu cuenta',
+                'mensaje' => 'Tu rol ha sido cambiado a cliente. Ya no tienes acceso como repartidor.',
+                'tipo' => 'cambio_rol'
+            ],
+            'administrador' => [
+                'titulo' => '¡Ahora eres administrador!',
+                'mensaje' => 'Tu cuenta ha sido actualizada con acceso de administrador.',
+                'tipo' => 'cambio_rol'
+            ]
+        ];
+        
+        // Obtener el mensaje adecuado según el rol, o usar un mensaje por defecto
+        $mensaje = $mensajes[$nuevoRol] ?? [
+            'titulo' => 'Cambio de rol en tu cuenta',
+            'mensaje' => "Tu rol ha sido cambiado a {$nuevoRol}.",
+            'tipo' => 'cambio_rol'
+        ];
+        
+        // Crear la notificación en la base de datos
+        $notificacion = Notificacion::create([
+            'usuario_id' => $user->id,
+            'titulo' => $mensaje['titulo'],
+            'mensaje' => $mensaje['mensaje'],
+            'tipo' => $mensaje['tipo'],
+            'leida' => false
+        ]);
+        
+        // Enviar la notificación push usando FCM
+        try {
+            $fcmService = App::make(FcmService::class);
+            $fcmService->sendNotification(
+                $user,
+                $mensaje['titulo'],
+                $mensaje['mensaje'],
+                [
+                    'notification_id' => (string) $notificacion->id,
+                    'type' => $mensaje['tipo']
+                ]
+            );
+        } catch (\Exception $e) {
+            // Registrar error pero no interrumpir el proceso
+            \Illuminate\Support\Facades\Log::error('Error al enviar notificación FCM: ' . $e->getMessage());
+        }
     }
 
     /**
