@@ -36,13 +36,13 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    
+
     protected static ?string $navigationLabel = 'Usuarios';
-    
+
     protected static ?string $navigationGroup = 'Administración';
-    
+
     protected static ?int $navigationSort = 1;
-    
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Form $form): Form
@@ -105,17 +105,17 @@ class UserResource extends Resource
                                 TextInput::make('password')
                                     ->label('Contraseña')
                                     ->password()
-                                    ->dehydrateStateUsing(fn ($state) => $state ? bcrypt($state) : null)
-                                    ->dehydrated(fn ($state) => filled($state))
-                                    ->required(fn (string $context): bool => $context === 'create')
+                                    ->dehydrateStateUsing(fn($state) => $state ? bcrypt($state) : null)
+                                    ->dehydrated(fn($state) => filled($state))
+                                    ->required(fn(string $context): bool => $context === 'create')
                                     ->maxLength(255),
 
                                 Toggle::make('email_verified_at')
                                     ->label('Email Verificado')
                                     ->default(false)
-                                    ->dehydrateStateUsing(fn ($state) => $state ? now() : null)
-                                    ->dehydrated(fn ($state) => $state)
-                                    ->formatStateUsing(fn ($state) => $state ? true : false),
+                                    ->dehydrateStateUsing(fn($state) => $state ? now() : null)
+                                    ->dehydrated(fn($state) => $state)
+                                    ->formatStateUsing(fn($state) => $state ? true : false),
 
                                 DateTimePicker::make('fecha_registro')
                                     ->label('Fecha de Registro')
@@ -139,7 +139,7 @@ class UserResource extends Resource
                 ImageColumn::make('foto_perfil')
                     ->label('Foto')
                     ->circular()
-                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name . ' ' . $record->apellido) . '&color=FFFFFF&background=6366F1'),
+                    ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name . ' ' . $record->apellido) . '&color=FFFFFF&background=6366F1'),
 
                 TextColumn::make('name')
                     ->label('Nombre')
@@ -225,19 +225,19 @@ class UserResource extends Resource
                     ->trueLabel('Eliminados')
                     ->falseLabel('Activos')
                     ->queries(
-                        true: fn (Builder $query) => $query->whereNotNull('deleted_at'),
-                        false: fn (Builder $query) => $query->whereNull('deleted_at'),
-                        blank: fn (Builder $query) => $query
+                        true: fn(Builder $query) => $query->whereNotNull('deleted_at'),
+                        false: fn(Builder $query) => $query->whereNull('deleted_at'),
+                        blank: fn(Builder $query) => $query
                     ),
             ])
             ->actions([
                 ActionGroup::make([
                     Tables\Actions\ViewAction::make()
                         ->icon('heroicon-o-eye'),
-                    
+
                     Tables\Actions\EditAction::make()
                         ->icon('heroicon-o-pencil'),
-                    
+
                     Tables\Actions\Action::make('resetPassword')
                         ->label('Resetear contraseña')
                         ->icon('heroicon-o-key')
@@ -249,7 +249,7 @@ class UserResource extends Resource
                                 ->required()
                                 ->minLength(8)
                                 ->rule('regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'),
-                                
+
                             TextInput::make('password_confirmation')
                                 ->label('Confirmar contraseña')
                                 ->password()
@@ -264,14 +264,14 @@ class UserResource extends Resource
                                 ->success()
                                 ->send();
                         }),
-                    
+
                     Tables\Actions\ActionGroup::make([
                         Tables\Actions\DeleteAction::make()
                             ->icon('heroicon-o-trash'),
-                        
+
                         Tables\Actions\RestoreAction::make()
                             ->icon('heroicon-o-arrow-path'),
-                        
+
                         Tables\Actions\ForceDeleteAction::make()
                             ->icon('heroicon-o-x-mark'),
                     ])->dropdown(true),
@@ -282,7 +282,7 @@ class UserResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
-                    
+
                     Tables\Actions\BulkAction::make('verificar')
                         ->label('Marcar como verificados')
                         ->icon('heroicon-o-check-badge')
@@ -305,6 +305,22 @@ class UserResource extends Resource
             ->defaultSort('created_at', 'desc');
     }
 
+    public static function getRepartidorStatus($record): string
+    {
+        if (!$record) return 'No disponible';
+
+        if ($record->rol !== 'repartidor') {
+            return 'No es repartidor';
+        }
+
+        if (!$record->repartidor) {
+            return 'Sin perfil de repartidor';
+        }
+
+        $ubicacion = $record->repartidor->ultima_ubicacion_lat ? 'Con ubicación' : 'Sin ubicación';
+        return "Perfil de repartidor activo. {$ubicacion}";
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -323,7 +339,7 @@ class UserResource extends Resource
             'view' => Pages\ViewUser::route('/{record}'),
         ];
     }
-    
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
