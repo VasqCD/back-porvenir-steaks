@@ -19,9 +19,11 @@ class CreatePedido extends CreateRecord
         $pedido = $this->record;
         
         // Registrar estado inicial en historial
+        $estadoAnterior = $pedido->getOriginal('estado') ?? 'nuevo';
+
         HistorialEstadoPedido::create([
             'pedido_id' => $pedido->id,
-            'estado_anterior' => null,
+            'estado_anterior' => $estadoAnterior,
             'estado_nuevo' => $pedido->estado,
             'fecha_cambio' => now(),
             'usuario_id' => auth()->id(),
