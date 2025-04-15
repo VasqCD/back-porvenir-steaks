@@ -1,16 +1,18 @@
-@component('mail::message')
-    # Código de Verificación
-
+<x-mail::message>
+    <x-mail::header>
+        Código de Verificación
+    </x-mail::header>
+    
     Hola {{ $user->name }},
-
+    
     Tu código de verificación es:
-
-    @component('mail::panel')
+    
+    <x-mail::panel>
         <div style="text-align: center; font-size: 24px; font-weight: bold;">{{ $codigo }}</div>
-    @endcomponent
-
+    </x-mail::panel>
+    
     Este código es válido por 30 minutos.
-
-    Gracias,<br>
+    
+    Gracias,
     {{ config('app.name') }}
-@endcomponent
+</x-mail::message>
