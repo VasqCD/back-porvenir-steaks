@@ -226,7 +226,6 @@ class PedidoController extends Controller
                 'message' => 'Pedido creado exitosamente',
                 'pedido' => $pedido->load(['detalles.producto', 'ubicacion'])
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
@@ -301,9 +300,11 @@ class PedidoController extends Controller
             ->findOrFail($id);
 
         // Verificar que el pedido pertenezca al usuario o sea repartidor/admin
-        if ($pedido->usuario_id != $usuario->id &&
+        if (
+            $pedido->usuario_id != $usuario->id &&
             $usuario->rol != 'administrador' &&
-            ($usuario->rol != 'repartidor' || $pedido->repartidor_id != $usuario->repartidor->id)) {
+            ($usuario->rol != 'repartidor' || $pedido->repartidor_id != $usuario->repartidor->id)
+        ) {
             return response()->json([
                 'message' => 'No tiene permiso para ver este pedido'
             ], 403);
@@ -355,9 +356,11 @@ class PedidoController extends Controller
             ], 403);
         }
 
-        if ($usuario->rol == 'repartidor' &&
+        if (
+            $usuario->rol == 'repartidor' &&
             ($pedido->repartidor_id != $usuario->repartidor->id ||
-                !in_array($request->estado, ['en_camino', 'entregado']))) {
+                !in_array($request->estado, ['en_camino', 'entregado']))
+        ) {
             return response()->json([
                 'message' => 'No tiene permiso para esta acción'
             ], 403);
@@ -425,7 +428,6 @@ class PedidoController extends Controller
                 'message' => 'Estado de pedido actualizado exitosamente',
                 'pedido' => $pedido
             ]);
-
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
@@ -543,22 +545,33 @@ class PedidoController extends Controller
             ], 403);
         }
 
-        $query = Pedido::with(['detalles.producto', 'ubicacion', 'usuario']);
+        try {
+            $query = Pedido::with(['detalles.producto', 'ubicacion', 'usuario']);
 
-        if ($usuario->rol == 'repartidor') {
-            // Repartidores ven los que están en estado "en_camino" y asignados a ellos
-            $query->where('repartidor_id', $usuario->repartidor->id)
-                ->where('estado', 'en_camino');
-        } else {
-            // Administradores ven todos los pendientes o en cocina
-            $query->whereIn('estado', ['pendiente', 'en_cocina']);
+            if ($usuario->rol == 'repartidor' && $usuario->repartidor) {
+                // Repartidores ven los que están en estado "en_camino" y asignados a ellos
+                $query->where('repartidor_id', $usuario->repartidor->id)
+                    ->where('estado', 'en_camino');
+            } else if ($usuario->rol == 'administrador') {
+                // Administradores ven todos los pendientes o en cocina
+                $query->whereIn('estado', ['pendiente', 'en_cocina']);
+            } else {
+                // Si es repartidor pero no tiene perfil de repartidor asociado
+                return response()->json([
+                    'message' => 'Su perfil de repartidor no está correctamente configurado'
+                ], 400);
+            }
+
+            $query->orderBy('fecha_pedido', 'asc');
+            $pedidos = $query->get();
+
+            return response()->json($pedidos);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener pedidos pendientes',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $query->orderBy('fecha_pedido', 'asc');
-
-        $pedidos = $query->get();
-
-        return response()->json($pedidos);
     }
 
     /**
