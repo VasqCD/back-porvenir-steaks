@@ -18,6 +18,7 @@ use Filament\Forms\Form;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\DetallePedido;
+use Illuminate\Support\Facades\Cache;
 
 class ReportPage extends Page implements HasForms
 {
@@ -40,8 +41,17 @@ class ReportPage extends Page implements HasForms
 
     public function mount()
     {
-        $this->fechaInicio = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->fechaFin = Carbon::now()->format('Y-m-d');
+        // Validar fechas
+        try {
+            $this->fechaInicio = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $this->fechaFin = Carbon::now()->format('Y-m-d');
+        } catch (\Exception $e) {
+            // Manejar error de fechas inválidas
+            $this->fechaInicio = Carbon::now()->subMonths(1)->format('Y-m-d');
+            $this->fechaFin = Carbon::now()->format('Y-m-d');
+            // Notificar al usuario
+        }
+
         $this->form->fill();
     }
 
@@ -58,20 +68,20 @@ class ReportPage extends Page implements HasForms
                                     ->default(Carbon::now()->startOfMonth())
                                     ->maxDate(Carbon::now())
                                     ->reactive(),
-                                
+
                                 DatePicker::make('fechaFin')
                                     ->label('Fecha Fin')
                                     ->default(Carbon::now())
-                                    ->minDate(fn ($get) => $get('fechaInicio'))
+                                    ->minDate(fn($get) => $get('fechaInicio'))
                                     ->maxDate(Carbon::now())
                                     ->reactive(),
-                                
+
                                 Select::make('categoria')
                                     ->label('Categoría')
                                     ->options(Categoria::pluck('nombre', 'id'))
                                     ->placeholder('Todas las categorías')
                                     ->reactive(),
-                                
+
                                 Select::make('estado')
                                     ->label('Estado de Pedidos')
                                     ->options([
@@ -91,31 +101,39 @@ class ReportPage extends Page implements HasForms
 
     public function getDatosVentasPorPeriodo()
     {
-        $query = Pedido::query()
-            ->whereBetween('fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59']);
-        
-        if ($this->estado) {
-            $query->where('estado', $this->estado);
-        } else {
-            $query->whereIn('estado', ['entregado', 'en_camino', 'en_cocina']);
-        }
+        $cacheKey = "ventas_periodo_{$this->fechaInicio}_{$this->fechaFin}_{$this->categoria}_{$this->estado}";
 
-        if ($this->categoria) {
-            $query->whereHas('detalles.producto', function ($q) {
-                $q->where('categoria_id', $this->categoria);
-            });
-        }
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () {
+            $query = Pedido::query()
+                ->whereBetween('fecha_pedido', [$this->fechaInicio, $this->fechaFin . ' 23:59:59']);
 
-        $ventasPorDia = $query->select(
+            if ($this->estado) {
+                $query->where('estado', $this->estado);
+            } else {
+                $query->whereIn('estado', ['entregado', 'en_camino', 'en_cocina']);
+            }
+
+            if ($this->categoria) {
+                $query->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('detalle_pedidos')
+                        ->join('productos', 'detalle_pedidos.producto_id', '=', 'productos.id')
+                        ->whereRaw('detalle_pedidos.pedido_id = pedidos.id')
+                        ->where('productos.categoria_id', $this->categoria);
+                });
+            }
+
+            $ventasPorDia = $query->select(
                 DB::raw('DATE(fecha_pedido) as fecha'),
                 DB::raw('SUM(total) as total'),
                 DB::raw('COUNT(*) as cantidad')
             )
-            ->groupBy(DB::raw('DATE(fecha_pedido)'))
-            ->orderBy('fecha', 'asc')
-            ->get();
+                ->groupBy(DB::raw('DATE(fecha_pedido)'))
+                ->orderBy('fecha', 'asc')
+                ->get();
 
-        return $ventasPorDia;
+            return $ventasPorDia;
+        });
     }
 
     public function getTopProductos()
@@ -123,7 +141,7 @@ class ReportPage extends Page implements HasForms
         $query = DetallePedido::query()
             ->join('pedidos', 'detalle_pedidos.pedido_id', '=', 'pedidos.id')
             ->join('productos', 'detalle_pedidos.producto_id', '=', 'productos.id')
-            ->whereBetween('pedidos.fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59']);
+            ->whereBetween('pedidos.fecha_pedido', [$this->fechaInicio, $this->fechaFin . ' 23:59:59']);
 
         if ($this->estado) {
             $query->where('pedidos.estado', $this->estado);
@@ -136,10 +154,10 @@ class ReportPage extends Page implements HasForms
         }
 
         $topProductos = $query->select(
-                'productos.nombre',
-                DB::raw('SUM(detalle_pedidos.cantidad) as cantidad_vendida'),
-                DB::raw('SUM(detalle_pedidos.subtotal) as total_vendido')
-            )
+            'productos.nombre',
+            DB::raw('SUM(detalle_pedidos.cantidad) as cantidad_vendida'),
+            DB::raw('SUM(detalle_pedidos.subtotal) as total_vendido')
+        )
             ->groupBy('productos.id', 'productos.nombre')
             ->orderBy('cantidad_vendida', 'desc')
             ->limit(10)
@@ -154,7 +172,7 @@ class ReportPage extends Page implements HasForms
             ->join('pedidos', 'detalle_pedidos.pedido_id', '=', 'pedidos.id')
             ->join('productos', 'detalle_pedidos.producto_id', '=', 'productos.id')
             ->join('categorias', 'productos.categoria_id', '=', 'categorias.id')
-            ->whereBetween('pedidos.fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59']);
+            ->whereBetween('pedidos.fecha_pedido', [$this->fechaInicio, $this->fechaFin . ' 23:59:59']);
 
         if ($this->estado) {
             $query->where('pedidos.estado', $this->estado);
@@ -167,10 +185,10 @@ class ReportPage extends Page implements HasForms
         }
 
         $ventasPorCategoria = $query->select(
-                'categorias.nombre',
-                DB::raw('SUM(detalle_pedidos.subtotal) as total_vendido'),
-                DB::raw('COUNT(DISTINCT pedidos.id) as cantidad_pedidos')
-            )
+            'categorias.nombre',
+            DB::raw('SUM(detalle_pedidos.subtotal) as total_vendido'),
+            DB::raw('COUNT(DISTINCT pedidos.id) as cantidad_pedidos')
+        )
             ->groupBy('categorias.id', 'categorias.nombre')
             ->orderBy('total_vendido', 'desc')
             ->get();
@@ -183,7 +201,7 @@ class ReportPage extends Page implements HasForms
         $query = Pedido::query()
             ->join('repartidores', 'pedidos.repartidor_id', '=', 'repartidores.id')
             ->join('users', 'repartidores.usuario_id', '=', 'users.id')
-            ->whereBetween('pedidos.fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59'])
+            ->whereBetween('pedidos.fecha_pedido', [$this->fechaInicio, $this->fechaFin . ' 23:59:59'])
             ->whereNotNull('pedidos.repartidor_id');
 
         if ($this->estado) {
@@ -191,12 +209,12 @@ class ReportPage extends Page implements HasForms
         }
 
         $desempenoRepartidores = $query->select(
-                'users.name',
-                DB::raw('COUNT(pedidos.id) as total_pedidos'),
-                DB::raw('SUM(CASE WHEN pedidos.estado = "entregado" THEN 1 ELSE 0 END) as pedidos_entregados'),
-                DB::raw('SUM(CASE WHEN pedidos.estado = "cancelado" THEN 1 ELSE 0 END) as pedidos_cancelados'),
-                DB::raw('AVG(pedidos.calificacion) as calificacion_promedio')
-            )
+            'users.name',
+            DB::raw('COUNT(pedidos.id) as total_pedidos'),
+            DB::raw('SUM(CASE WHEN pedidos.estado = "entregado" THEN 1 ELSE 0 END) as pedidos_entregados'),
+            DB::raw('SUM(CASE WHEN pedidos.estado = "cancelado" THEN 1 ELSE 0 END) as pedidos_cancelados'),
+            DB::raw('AVG(pedidos.calificacion) as calificacion_promedio')
+        )
             ->groupBy('users.id', 'users.name')
             ->orderBy('total_pedidos', 'desc')
             ->get();
@@ -206,30 +224,26 @@ class ReportPage extends Page implements HasForms
 
     public function getEstadisticasGenerales()
     {
-        // Total de ventas en el periodo
-        $totalVentas = Pedido::query()
-            ->whereBetween('fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59'])
+        $estadosFiltro = $this->estado
+            ? [$this->estado]
+            : ['entregado', 'en_camino', 'en_cocina'];
+
+        // Obtener todos los pedidos del período con una sola consulta
+        $pedidosBase = Pedido::query()
+            ->whereBetween('fecha_pedido', [$this->fechaInicio, $this->fechaFin . ' 23:59:59']);
+
+        // Obtener estadísticas principales
+        $pedidosPrincipales = (clone $pedidosBase)
             ->when($this->estado, function ($query) {
                 $query->where('estado', $this->estado);
-            }, function ($query) {
-                $query->whereIn('estado', ['entregado', 'en_camino', 'en_cocina']);
+            }, function ($query) use ($estadosFiltro) {
+                $query->whereIn('estado', $estadosFiltro);
             })
-            ->sum('total');
+            ->selectRaw('SUM(total) as total_ventas, COUNT(*) as total_pedidos')
+            ->first();
 
-        // Total de pedidos en el periodo
-        $totalPedidos = Pedido::query()
-            ->whereBetween('fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59'])
-            ->when($this->estado, function ($query) {
-                $query->where('estado', $this->estado);
-            })
-            ->count();
-
-        // Ticket promedio
-        $ticketPromedio = $totalPedidos > 0 ? $totalVentas / $totalPedidos : 0;
-
-        // Distribución por estado
-        $distribucionEstados = Pedido::query()
-            ->whereBetween('fecha_pedido', [$this->fechaInicio, $this->fechaFin.' 23:59:59'])
+        // Distribución por estado en una sola consulta
+        $distribucionEstados = (clone $pedidosBase)
             ->select('estado', DB::raw('COUNT(*) as cantidad'))
             ->groupBy('estado')
             ->pluck('cantidad', 'estado')
@@ -238,8 +252,13 @@ class ReportPage extends Page implements HasForms
         // Nuevos clientes en el periodo
         $nuevosClientes = User::query()
             ->where('rol', 'cliente')
-            ->whereBetween('fecha_registro', [$this->fechaInicio, $this->fechaFin.' 23:59:59'])
+            ->whereBetween('fecha_registro', [$this->fechaInicio, $this->fechaFin . ' 23:59:59'])
             ->count();
+
+        // Cálculo del ticket promedio
+        $totalVentas = $pedidosPrincipales->total_ventas ?? 0;
+        $totalPedidos = $pedidosPrincipales->total_pedidos ?? 0;
+        $ticketPromedio = $totalPedidos > 0 ? $totalVentas / $totalPedidos : 0;
 
         return [
             'total_ventas' => $totalVentas,
