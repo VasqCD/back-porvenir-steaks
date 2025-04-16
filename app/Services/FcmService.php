@@ -21,44 +21,41 @@ class FcmService
 
     /**
      * Registrar o actualizar token FCM
+     * 
+     * @param User $user Usuario al que pertenece el token
+     * @param string $token Token FCM del dispositivo
+     * @param string $deviceType Tipo de dispositivo (android, ios, web)
+     * @return bool Resultado de la operación
      */
     public function saveToken(User $user, string $token, string $deviceType = 'android')
     {
-        // Buscar si ya existe el token
-        $existingToken = FcmToken::where('token', $token)->first();
-
-        if ($existingToken) {
-            // Si el token existe pero pertenece a otro usuario, desactivar el anterior
-            if ($existingToken->usuario_id != $user->id) {
-                $existingToken->active = false;
-                $existingToken->save();
-
-                // Crear nuevo registro para el usuario actual
-                FcmToken::create([
+        try {
+            
+            FcmToken::updateOrCreate(
+                ['token' => $token],
+                [
                     'usuario_id' => $user->id,
-                    'token' => $token,
                     'device_type' => $deviceType,
                     'active' => true
-                ]);
-            } else {
-                // Actualizar estado si es necesario
-                if (!$existingToken->active) {
-                    $existingToken->active = true;
-                    $existingToken->save();
-                }
-            }
-        } else {
-            // Crear nuevo registro
-            FcmToken::create([
-                'usuario_id' => $user->id,
-                'token' => $token,
-                'device_type' => $deviceType,
-                'active' => true
-            ]);
-        }
+                ]
+            );
+            // Desactivar otros tokens del mismo usuario y tipo de dispositivo
+            FcmToken::where('usuario_id', $user->id)
+                ->where('device_type', $deviceType)
+                ->where('token', '!=', $token)
+                ->update(['active' => false]);
 
-        return true;
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Error al guardar token FCM: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'token' => substr($token, 0, 10) . '...' 
+            ]);
+
+            return false;
+        }
     }
+
 
     /**
      * Enviar notificación a un usuario
