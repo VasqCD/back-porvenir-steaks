@@ -84,14 +84,14 @@
         </div>
         
         @if(count($this->getNotificaciones()) > 0)
-            <div class="mt-4 text-center">
-                <a 
-                    href="{{ route('filament.admin.resources.notificaciones.index') }}" 
-                    class="text-sm font-medium text-primary-600 hover:text-primary-500"
-                >
-                    Ver todas las notificaciones
-                </a>
-            </div>
-        @endif
+    <div class="mt-4 text-center">
+        <a 
+            href="{{ \App\Filament\Resources\NotificacionResource::getUrl('index') }}"
+            class="text-sm font-medium text-primary-600 hover:text-primary-500"
+        >
+            Ver todas las notificaciones
+        </a>
+    </div>
+@endif
     </x-filament::card>
 </x-filament::widget>
