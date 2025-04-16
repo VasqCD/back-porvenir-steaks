@@ -205,7 +205,7 @@ class PedidoController extends Controller
             // Registrar historial
             HistorialEstadoPedido::create([
                 'pedido_id' => $pedido->id,
-                'estado_anterior' => null,
+                'estado_anterior' => 'sin estado',
                 'estado_nuevo' => 'pendiente',
                 'fecha_cambio' => now(),
                 'usuario_id' => $usuario->id,
