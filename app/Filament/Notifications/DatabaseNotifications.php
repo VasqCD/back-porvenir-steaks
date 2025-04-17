@@ -75,7 +75,7 @@ class DatabaseNotifications
             'solicitud_repartidor' => route('filament.admin.resources.users.index', [
                 'tableFilters[rol][value]' => 'cliente',
             ]),
-            default => route('filament.admin.dashboard'),
+            default => route('filament.admin.pages.dashboard'),
         };
     }
 }
