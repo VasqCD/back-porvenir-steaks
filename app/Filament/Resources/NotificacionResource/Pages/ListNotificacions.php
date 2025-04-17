@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\NotificacionResource\Pages;
 
 use App\Filament\Resources\NotificacionResource;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Notifications\Notification;
 
 class ListNotificacions extends ListRecords
 {
@@ -20,7 +21,13 @@ class ListNotificacions extends ListRecords
                 ->color('success')
                 ->action(function () {
                     \App\Models\Notificacion::where('leida', false)->update(['leida' => true]);
-                    $this->notify('success', 'Todas las notificaciones han sido marcadas como leídas');
+                    
+                    // Usar el método correcto para mostrar notificaciones en Filament
+                    Notification::make()
+                        ->title('Notificaciones actualizadas')
+                        ->body('Todas las notificaciones han sido marcadas como leídas')
+                        ->success()
+                        ->send();
                 })
                 ->requiresConfirmation(),
         ];

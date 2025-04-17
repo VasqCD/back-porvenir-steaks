@@ -234,7 +234,7 @@ class NotificacionResource extends Resource
         return [
             'index' => Pages\ListNotificacions::route('/'),
             'create' => Pages\CreateNotificacion::route('/create'),
-            //'view' => Pages\ViewNotificacion::route('/{record}'),
+            'view' => Pages\ViewNotificacion::route('/{record}'),
             'edit' => Pages\EditNotificacion::route('/{record}/edit'),
         ];
     }
