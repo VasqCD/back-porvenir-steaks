@@ -613,6 +613,18 @@
             </div>
             <div class="border-t border-secondary-800 pt-8">
                 <p class="text-center text-secondary-400">&copy; {{ date('Y') }} El Porvenir Steaks. Todos los derechos reservados.</p>
+
+                <div class="flex items-center justify-center gap-2 mt-4">
+                    <span class="text-sm text-secondary-400/70">Desarrollado y mantenido por</span>
+                    <a href="https://initiumx.dev/" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition">
+                        <img
+                            src="https://assets.zyrosite.com/m2W89PJ7WpCq8jlM/initiumx-m2W8LBPzLnFOPx3r.svg"
+                            alt="InitiumX"
+                            class="h-6"
+                        />
+                    </a>
+                </div>
+
             </div>
         </div>
     </footer>
