@@ -221,7 +221,7 @@
                 <!-- Producto 1 -->
                 <div class="card group">
                     <div class="relative overflow-hidden">
-                        <img src="https://cdn-ilddihb.nitrocdn.com/MgqZCGPEMHvMRLsisMUCAIMWvgGMxqaj/assets/images/optimized/rev-f7c1f9b/www.goya.com/wp-content/uploads/2023/10/chicken-shrimp-and-steak-parrillada-900x900.jpg" alt="T-Bone Steak" class="h-64 w-full object-cover transform group-hover:scale-105 transition-transform duration-300">
+                        <img src="https://tuchefathome.com/wp-content/uploads/2021/11/parrilada1.webp" alt="T-Bone Steak" class="h-64 w-full object-cover transform group-hover:scale-105 transition-transform duration-300">
                         <div class="absolute top-2 right-2 bg-primary-600 text-white rounded-full px-3 py-1 text-sm">
                             Premium
                         </div>
